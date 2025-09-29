@@ -57,7 +57,7 @@ This lab is where **theory meets practice**.
 ##  How to Run
 
 ```bash
-git clone https://github.com/<your-username>/financial-engineering-lab.git
+git clone https://github.com/ETTOUSY-BADR/financial-engineering-lab.git
 cd financial-engineering-lab
 python -m venv .venv
 source .venv/bin/activate  # (Linux/Mac)

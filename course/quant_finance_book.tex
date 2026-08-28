@@ -1,28 +1,123 @@
-\documentclass[11pt,oneside]{book}
-\usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
-\usepackage{booktabs,microtype,hyperref,xcolor,enumitem,fancyhdr}
-\definecolor{ink}{HTML}{17202A}\definecolor{accent}{HTML}{0B6E69}
-\hypersetup{colorlinks=true,linkcolor=accent,urlcolor=accent,citecolor=accent,pdftitle={Quantitative Finance: From Foundations to Research}}
-\pagestyle{fancy}\fancyhf{}\fancyhead[LE,RO]{\thepage}\fancyhead[RE]{\nouppercase{\leftmark}}\fancyhead[LO]{Financial Engineering Lab}
-\newtheorem{theorem}{Theorem}[chapter]\newtheorem{proposition}[theorem]{Proposition}\newtheorem{lemma}[theorem]{Lemma}\newtheorem{definition}[theorem]{Definition}\newtheorem{assumption}[theorem]{Assumption}\newtheorem{remark}[theorem]{Remark}
-\DeclareMathOperator{\E}{\mathbb{E}}\DeclareMathOperator{\Var}{Var}\DeclareMathOperator{\Cov}{Cov}\DeclareMathOperator{\Prob}{\mathbb{P}}\newcommand{\R}{\mathbb{R}}\newcommand{\dd}{\,\mathrm{d}}\newcommand{\1}{\mathbf{1}}
+\documentclass[12pt,oneside,openany]{book}
+\input{preamble}
+
 \begin{document}
 \frontmatter
-\begin{titlepage}\centering\vspace*{2cm}{\color{accent}\rule{\textwidth}{1.5pt}}\\[1.2cm]
-{\Huge\bfseries Quantitative Finance\\[0.2cm]From Foundations to Research}\\[1cm]
-{\Large A mathematical and empirical laboratory for financial engineering}\\[2cm]
-\begin{tabular}{ll}Author: & Badr Ettousy\\Repository: & Financial Engineering Lab\\Version: & 1.0, 2026\end{tabular}
-\vfill\emph{Theory is a model; evidence is a discipline.}\end{titlepage}
-\chapter*{How to use this book}\addcontentsline{toc}{chapter}{How to use this book}
-This text is a study companion, not investment advice. Every model is conditional on assumptions, calibration choices, and data quality. Read each theorem with its hypotheses, reproduce each numerical result, and treat out-of-sample validation as part of the mathematics.
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+  \pagecolor{navy}\color{white}
+  \vspace*{1.3cm}
+  {\sffamily\bfseries\fontsize{15}{18}\selectfont FINANCIAL ENGINEERING LAB}\par
+  \vspace{0.45cm}\color{gold}\rule{0.96\linewidth}{1.8pt}\color{white}
+  \vspace{1.7cm}
+  {\sffamily\bfseries\fontsize{35}{41}\selectfont QUANTITATIVE\par FINANCE}\par
+  \vspace{0.6cm}
+  {\sffamily\fontsize{20}{25}\selectfont From Mathematical Foundations\\to Empirical Research}\par
+  \vfill
+  \begin{minipage}{0.82\textwidth}
+    \color{mist}\large Probability $\bullet$ Stochastic Calculus $\bullet$ Econometrics\\[0.2cm]
+    Asset Pricing $\bullet$ Derivatives $\bullet$ Fixed Income\\[0.2cm]
+    Portfolio and Risk $\bullet$ Computational Methods
+  \end{minipage}
+  \vfill
+  {\Large\bfseries Badr Ettousy}\par
+  \vspace{0.25cm}{\large Research monograph and reproducible laboratory}\par
+  \vspace{0.55cm}{\small Second expanded edition $\mid$ 2026}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\nopagecolor\color{ink}
+
+\chapter*{Copyright and scope}
+\addcontentsline{toc}{chapter}{Copyright and scope}
+Copyright \copyright\ 2026 Badr Ettousy. This original educational text is developed
+inside the Financial Engineering Lab. It is not investment advice, an offer, or a
+claim that a mathematical model can eliminate financial uncertainty. Data providers
+retain all rights in their data. Every empirical result is conditional on its sample,
+transformations, implementation, and market frictions.
+
+\chapter*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+Financial engineering is the disciplined conversion of economic questions into
+mathematical objects, statistical estimands, algorithms, and decisions. Its craft
+lies neither in formula collection nor in unconstrained prediction. It lies in
+knowing exactly what has been assumed, what has been identified by the data, what
+has merely been calibrated, and how an apparently precise answer can fail.
+
+This book begins with proof and structure because quantitative work becomes fragile
+when notation hides gaps in reasoning. It then moves through macro-finance,
+econometrics, market institutions, asset pricing, derivatives, fixed income,
+portfolio construction, risk, and computation. Each part has four layers:
+\emph{definitions}, which fix meaning; \emph{theorems and proofs}, which establish
+what follows; \emph{worked examples}, which turn abstractions into calculations; and
+\emph{research protocols}, which connect the mathematics to reproducible evidence.
+
+The intended progression is from a first serious encounter with the subject to the
+point at which the reader can read modern papers critically, implement models, and
+design an out-of-sample study. The text is deliberately explicit about conventions,
+regularity conditions, timestamps, and failure modes. Those details are not
+administrative: in quantitative finance they are part of the theorem.
+
+\chapter*{How to study from this book}
+\addcontentsline{toc}{chapter}{How to study from this book}
+For a first pass, read the core definitions and worked examples, reproduce the
+calculations, and solve the exercises marked \textbf{Core}. For a second pass, write
+each proof without looking, implement the numerical algorithms, and challenge every
+empirical claim with a different sample. A research-level pass should include the
+advanced exercises, the projects in Part~\ref{part:research}, and a written model-risk
+memo.
+
+Throughout, $\mathbb P$ denotes the physical or statistical probability measure and
+$\mathbb Q$ a pricing measure. Equality of random variables normally means almost-sure
+equality. Vectors are columns; $\bm 1$ is a vector of ones; dates at which a decision
+is made are distinguished from dates at which data become observable. Annualization
+uses an explicitly stated clock and never repairs dependence by itself.
+
 \tableofcontents
+
 \mainmatter
+\part{Mathematical Language of Finance}\label{part:mathematics}
 \input{01_mathematics/foundations}
+
+\part{Macroeconomics and the Term Structure}\label{part:macro}
 \input{02_macroeconomics/macro}
+
+\part{Econometrics and Causal Evidence}\label{part:econometrics}
 \input{03_microeconometrics/econometrics}
+
+\part{Markets, Instruments, and Institutions}\label{part:markets}
 \input{04_financial_markets/markets}
+
+\part{Asset Pricing}\label{part:assetpricing}
+\input{05_asset_pricing/asset_pricing}
+
+\part{Derivatives and Stochastic Models}\label{part:derivatives}
+\input{06_derivatives/derivatives}
+
+\part{Fixed Income and Credit}\label{part:fixedincome}
+\input{07_fixed_income_credit/fixed_income_credit}
+
+\part{Portfolio Construction and Risk}\label{part:portfolio}
+\input{08_portfolio_risk/portfolio_risk}
+
+\part{Numerical and Statistical Computing}\label{part:numerical}
+\input{09_numerical_methods/numerical_methods}
+
+\part{Reproducible Quantitative Research}\label{part:research}
+\input{10_research_laboratory/research_laboratory}
+
+\appendix
+\part{Reference Material}
+\input{appendices/reference}
+
 \backmatter
-\chapter*{Research checklist}\addcontentsline{toc}{chapter}{Research checklist}
-Before trusting a result: state the estimand; identify the filtration and information set; write the assumptions; separate training, validation, and test periods; report uncertainty; stress the model; test sensitivity to costs, missing data, and dependence; and document provenance.
+\chapter*{Closing research checklist}
+\addcontentsline{toc}{chapter}{Closing research checklist}
+A result is not ready because code ran. State the decision and estimand; fix the
+probability space and information set; enumerate economic and statistical
+assumptions; record source, vintage, timezone, units, and transformations; separate
+training, validation, and test periods; quantify sampling and model uncertainty;
+include costs and capacity; stress the tails and the implementation; preserve a
+complete audit trail; and explain what evidence would falsify the conclusion.
+
+\input{bibliography}
 \end{document}

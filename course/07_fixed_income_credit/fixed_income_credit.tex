@@ -1,0 +1,417 @@
+\chapter{Bond Mathematics and Curve Construction}
+
+\begin{objectives}
+Price fixed-income cash flows under market conventions, construct discount curves,
+measure rate sensitivity, and diagnose interpolation and bootstrapping risk.
+\end{objectives}
+
+\section{Present value and compounding}
+
+For deterministic cash flows $C_i$ at dates $T_i$,
+\[
+P_t=\sum_i C_iP(t,T_i).
+\]
+If a flat continuously compounded yield $y$ is used,
+$P(y)=\sum_iC_i\e^{-y(T_i-t)}$. Market instruments instead use instrument-specific
+compounding, day counts, settlement lags, calendars, and accrued-interest rules.
+
+An annualized rate is incomplete without basis. ACT/360 and ACT/365 change accrual;
+30/360 changes date counting; business-day adjustment changes payment date.
+Production curve code treats conventions as data.
+
+\section{Bootstrapping}
+
+Bootstrapping solves discount factors sequentially from liquid instruments. A par
+coupon bond priced at par satisfies
+\[
+1=c_n\sum_{i=1}^n\delta_iP(0,T_i)+P(0,T_n).
+\]
+If earlier discounts are known,
+\[
+P(0,T_n)=
+\frac{1-c_n\sum_{i=1}^{n-1}\delta_iP(0,T_i)}
+{1+c_n\delta_n}.
+\]
+
+Deposits, futures or forward-rate agreements, overnight swaps, term swaps, and bonds
+can occupy different curve segments. Multi-curve construction discounts
+collateralized cash flows on an overnight curve while projecting each floating tenor
+on its own forward curve.
+
+\section{Interpolation}
+
+Quotes exist at discrete maturities while pricing needs all dates. Interpolating
+zero rates, log discounts, forwards, or par rates imposes different shapes.
+Linear interpolation of log discount factors gives piecewise constant forwards.
+Cubic splines are smooth but can oscillate and create negative forward rates.
+Monotone-convex methods aim to preserve economically sensible local behavior.
+
+Curve risk includes quote noise, interpolation choice, instrument selection, and
+extrapolation. A perfect repricing of bootstrap instruments does not make the
+between-knot curve observed.
+
+\section{Duration and convexity}
+
+For cash-flow weights
+$w_i=C_i\e^{-yt_i}/P$, Macaulay duration is
+$D_M=\sum_iw_it_i$. With continuous compounding, modified duration equals $D_M$:
+\[
+-\frac1P\frac{\partial P}{\partial y}=D_M.
+\]
+Convexity is
+$\mathcal C=P^{-1}\partial^2P/\partial y^2=\sum_iw_it_i^2$.
+
+Yield duration assumes a parallel flat-yield move. Key-rate duration shocks one
+curve node with an interpolation rule. Partial derivatives to market quotes provide
+more realistic curve risk but depend on the bootstrap Jacobian.
+
+\begin{proposition}[Positive convexity of an option-free bond]
+For fixed positive cash flows under a parallel continuously compounded yield,
+$P''(y)>0$.
+\end{proposition}
+\begin{proof}
+$P''(y)=\sum_i t_i^2C_i\e^{-yt_i}>0$ when at least one positive cash flow occurs
+after time zero.
+\end{proof}
+
+\section{Immunization}
+
+A liability is locally immunized by matching present value and duration with an
+asset portfolio. Convexity improves protection for parallel moves. Multiple
+key-rate constraints immunize selected curve deformations:
+\[
+\min_w w^\transpose\Sigma w
+\quad\text{s.t.}\quad
+A^\transpose w=b,
+\]
+where rows of $A$ contain value and key-rate exposures. Rebalancing, transaction
+costs, nonparallel moves, spread risk, and optionality limit immunization.
+
+\section{Problems}
+
+\begin{exercise}[Core: bootstrap]
+Bootstrap annual discount factors from three par rates and compute one-year forward
+rates. Check discount monotonicity.
+\end{exercise}
+\begin{exercise}[Core: duration]
+Derive duration and convexity for a zero-coupon bond and compare the approximation
+with the exact price change.
+\end{exercise}
+\begin{exercise}[Advanced: curve Jacobian]
+Use the implicit function theorem to derive sensitivities of bootstrapped discount
+factors to input par swap rates.
+\end{exercise}
+
+
+\chapter{Interest-Rate Models and Rate Derivatives}
+
+\begin{objectives}
+Model short rates and forward rates under risk-neutral and physical measures, price
+caps and swaptions, and understand calibration and measure consistency.
+\end{objectives}
+
+\section{Short-rate models}
+
+In a short-rate model,
+\[
+P(t,T)=\E_t^\Q\left[\exp\left(-\int_t^Tr_s\dd s\right)\right].
+\]
+Vasicek uses Gaussian mean reversion. Cox--Ingersoll--Ross uses
+\[
+\dd r_t=\kappa(\theta-r_t)\dd t+\sigma\sqrt{r_t}\dd W_t^\Q,
+\]
+which is affine and nonnegative under boundary conditions. Hull--White extends
+Vasicek with time-dependent drift:
+\[
+\dd r_t=(\theta(t)-a r_t)\dd t+\sigma\dd W_t^\Q,
+\]
+allowing exact fit to today's initial curve.
+
+Exact initial fit does not identify future dynamics. Mean reversion and volatility
+are calibrated to options or estimated under a measure; the physical drift requires
+risk-premium specification.
+
+\section{Heath--Jarrow--Morton}
+
+Instead of a short rate, HJM models the entire instantaneous forward curve:
+\[
+\dd f(t,T)=\alpha(t,T)\dd t+\sigma(t,T)^\transpose\dd W_t^\Q.
+\]
+No arbitrage restricts drift:
+\[
+\alpha(t,T)=
+\sigma(t,T)^\transpose\int_t^T\sigma(t,u)\dd u
+\]
+under the basic money-market measure convention. Thus volatility specification
+determines risk-neutral drift.
+
+Finite-dimensional Markov representations require special volatility structures.
+Direct curve models make it clear that today's curve is a state, not a scalar rate.
+
+\section{Forward measures and caplets}
+
+The simply compounded forward rate for $[T_1,T_2]$ is
+\[
+L_t(T_1,T_2)=
+\frac{1}{\delta}\left(
+\frac{P(t,T_1)}{P(t,T_2)}-1
+\right).
+\]
+Under the $T_2$-forward measure it is a martingale in a standard setting. A caplet
+payoff at $T_2$ is
+$N\delta(L_{T_1}-K)^+$ and Black's formula is
+\[
+V_t=NP(t,T_2)\delta
+[F\Phi(d_1)-K\Phi(d_2)]
+\]
+for lognormal forward $F=L_t(T_1,T_2)$.
+
+Negative rates motivate shifted lognormal or normal Bachelier quoting. A normal
+volatility has rate units; a lognormal volatility has percentage units. Conversion
+depends on forward, strike, and maturity.
+
+\section{Swaptions}
+
+A payer swaption grants the right to pay fixed $K$ and receive floating. Under the
+annuity numeraire
+\[
+A_t=\sum_i\delta_iP(t,T_i),
+\]
+the forward swap rate
+\[
+S_t=\frac{P(t,T_0)-P(t,T_n)}{A_t}
+\]
+is a martingale under its swap measure. Black-style pricing treats it as lognormal:
+\[
+V_t=A_t[S_t\Phi(d_1)-K\Phi(d_2)].
+\]
+
+Smile, cash settlement, day count, collateral, and exercise conventions enter real
+contracts. Bermudan swaptions depend on the joint curve evolution and optimal
+exercise.
+
+\section{Market models}
+
+The LIBOR market model specifies dynamics of a family of forward rates under their
+natural measures. Changing to one common simulation measure introduces drift terms
+depending on correlations and other forwards. Calibration matches cap and swaption
+volatilities but correlation is weakly identified by vanilla prices and critical for
+exotics.
+
+Post-benchmark-reform markets use overnight and term reference rates with fallback
+and compounding conventions. Mathematical notation should name the actual rate and
+accrual mechanism instead of retaining obsolete labels by habit.
+
+\section{Problems}
+
+\begin{exercise}[Core: CIR moments]
+Derive conditional mean of the CIR rate. Research the noncentral chi-square transition
+law and explain its exact-simulation benefit.
+\end{exercise}
+\begin{exercise}[Core: caplet measure]
+Derive caplet pricing by choosing the $T_2$ bond as numeraire.
+\end{exercise}
+\begin{exercise}[Advanced: HJM drift]
+Derive the HJM drift restriction by requiring discounted bond prices to be
+martingales.
+\end{exercise}
+
+
+\chapter{Credit Risk}
+
+\begin{objectives}
+Model default with structural and intensity approaches, bootstrap survival curves,
+price credit protection, and separate credit, liquidity, and recovery assumptions.
+\end{objectives}
+
+\section{Credit events and loss}
+
+Credit risk includes default, downgrade, spread widening, restructuring, and
+counterparty deterioration. If exposure at default is EAD, loss fraction is
+$LGD=1-R$, and default indicator is $D$, loss is
+\[
+L=\mathrm{EAD}\times LGD\times D.
+\]
+Expected loss is not unexpected loss. Dependence among EAD, recovery, and default is
+important in stress.
+
+\section{Structural models}
+
+In Merton's model, firm asset value follows a diffusion and equity is a call on
+assets with strike equal to promised debt:
+\[
+E_0=V_0\Phi(d_1)-D\e^{-rT}\Phi(d_2).
+\]
+Default at maturity occurs when $V_T<D$. Risky debt equals risk-free debt minus a put
+on firm assets.
+
+The model connects leverage and asset volatility to credit spreads, but firm asset
+value and volatility are latent, default can occur only at specified barriers, and
+short-maturity spreads are often too low without jumps or liquidity.
+
+First-passage models default when asset value crosses a barrier. Barrier design and
+capital structure become central.
+
+\section{Reduced-form intensity models}
+
+Let default time $\tau$ have intensity $\lambda_t$ so, informally,
+\[
+\Prob(t<\tau\leq t+\dd t\mid\tau>t,\F_t)=\lambda_t\dd t.
+\]
+Conditional survival is
+\[
+\Prob(\tau>T\mid\F_t)
+=\E_t\left[
+\exp\left(-\int_t^T\lambda_s\dd s\right)
+\right]
+\]
+under appropriate filtration and measure conditions.
+
+With deterministic intensity and recovery paid at default, a risky zero-coupon value
+is the sum of survival payment and expected recovery payment. Under zero recovery,
+$P^{\mathrm{risky}}(0,T)=P(0,T)S(0,T)$ when rates and default separate appropriately.
+
+\section{Credit default swaps}
+
+A CDS protection buyer pays spread $s$ until maturity or default and receives
+$1-R$ upon covered credit event. The par spread equates premium and protection legs:
+\[
+s\sum_i\delta_iP(0,T_i)S(0,T_i)
+\approx
+(1-R)\sum_iP(0,T_i)
+[S(0,T_{i-1})-S(0,T_i)],
+\]
+with production valuation adding accrual on default and exact timing.
+
+Given recovery and discount curve, quoted spreads bootstrap survival probabilities
+or piecewise intensities. Recovery and intensity are not separately well identified
+by CDS spreads alone.
+
+\section{Credit portfolio dependence}
+
+In a one-factor Gaussian latent-variable model,
+\[
+Z_i=\sqrt{\rho_i}Y+\sqrt{1-\rho_i}\varepsilon_i,
+\]
+and obligor $i$ defaults if $Z_i$ is below a threshold matching marginal default
+probability. Conditional on $Y$, defaults are independent. The common factor creates
+default clustering.
+
+Tail loss is extraordinarily sensitive to asset correlation, exposure concentration,
+recovery dependence, and model form. Gaussian dependence can understate joint
+extremes. Stress testing should include sector and macro scenarios rather than rely
+only on a fitted copula.
+
+\section{Migration matrices}
+
+A rating transition matrix $P$ has rows summing to one. Multi-year transition under
+time homogeneity is $P^n$. A continuous-time generator $Q$ has nonnegative
+off-diagonals, rows summing to zero, and transition matrix $\exp(Qt)$. Not every
+empirical discrete matrix is embeddable in a valid generator.
+
+Historical transition probabilities are physical. Pricing spreads reflects
+risk-neutral probabilities, recovery, liquidity, capital, and risk premia.
+
+\section{Counterparty exposure}
+
+Netting sets combine positive and negative trade values under enforceable legal
+agreements. Variation margin reduces current exposure; initial margin targets future
+exposure over margin period of risk. Rehypothecation, thresholds, disputes, and close-out
+delay affect residual exposure.
+
+Potential future exposure, expected shortfall of exposure, CVA, and regulatory
+exposure are different metrics. A simulation needs joint market factors, collateral
+rules, default dependence, and pathwise netting.
+
+\section{Problems}
+
+\begin{exercise}[Core: Merton]
+Show that risky debt equals a risk-free bond minus a put. Derive the risk-neutral
+default probability and distinguish it from expected loss.
+\end{exercise}
+\begin{exercise}[Core: CDS bootstrap]
+Bootstrap piecewise constant survival probabilities from two annual CDS spreads
+under a simplified payment convention.
+\end{exercise}
+\begin{exercise}[Advanced: wrong-way risk]
+Construct a joint model in which exposure and intensity share a factor. Compare CVA
+with an independence approximation.
+\end{exercise}
+
+
+\chapter{Securitization and Structured Credit}
+
+\begin{objectives}
+Understand cash-flow waterfalls, tranche loss, prepayment and extension risk, and
+why structured-credit models are highly sensitive to dependence and legal detail.
+\end{objectives}
+
+\section{Pooling and tranching}
+
+A securitization pools asset cash flows and allocates them through a contractual
+waterfall. A tranche with attachment $A$ and detachment $D$ has loss at portfolio
+loss fraction $L$:
+\[
+L_{A,D}(L)=
+\min\{(L-A)^+,D-A\}.
+\]
+Equity absorbs first loss; mezzanine absorbs intermediate loss; senior tranches lose
+only after subordination is exhausted.
+
+Expected tranche loss is nonlinear in the full portfolio-loss distribution. Two
+portfolios with the same expected total loss can have very different senior-tranche
+risk.
+
+\section{Dependence and base correlation}
+
+Increasing default correlation moves mass toward very low and very high portfolio
+loss. This can reduce equity expected loss at some points while increasing senior
+tail loss. Base correlation fits each equity tranche $[0,D]$ with a separate
+correlation, creating an interpolation convention rather than one internally
+consistent joint distribution.
+
+\section{Mortgage cash flows}
+
+Mortgage-backed securities contain borrower prepayment options. Falling rates can
+accelerate refinancing, shortening duration when price would otherwise rise;
+rising rates slow prepayment, extending duration when price falls. This negative
+convexity drives dynamic hedging demand.
+
+Prepayment depends on incentive, seasoning, burnout, housing turnover, credit,
+seasonality, and operational friction. A model needs loan-level or pool variables
+available at the valuation date.
+
+\section{Waterfall simulation}
+
+A pathwise engine applies:
+
+\begin{enumerate}
+\item scheduled interest and principal;
+\item prepayment and default;
+\item recovery lag and severity;
+\item fees and servicing;
+\item interest and principal priority;
+\item triggers, reserve accounts, and diversion;
+\item cleanup calls and termination.
+\end{enumerate}
+
+The legal prospectus is part of the model specification. A mathematically elegant
+loss model cannot compensate for an incorrect waterfall.
+
+\section{Stress and model risk}
+
+Structured products combine long horizons, nonlinear allocation, uncertain behavior,
+and sparse tail data. Stress unemployment, home prices, rates, refinancing capacity,
+recovery, correlation, and servicer performance. Report scenario cash flows and
+breakeven assumptions rather than only a single spread or rating.
+
+\section{Problems}
+
+\begin{exercise}[Core: tranche loss]
+Plot tranche loss as a function of portfolio loss for equity, mezzanine, and senior
+tranches. Identify delta with respect to total loss away from attachment points.
+\end{exercise}
+\begin{exercise}[Advanced: large homogeneous pool]
+Conditional on a Gaussian common factor, derive the limiting default fraction in a
+homogeneous portfolio and integrate to obtain expected tranche loss.
+\end{exercise}

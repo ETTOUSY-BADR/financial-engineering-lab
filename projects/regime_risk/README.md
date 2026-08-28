@@ -1,21 +1,44 @@
-# Regime-aware market risk
+# Regime-aware cross-asset risk
 
-This project turns the lab's mathematical foundations into a reproducible empirical study. It downloads adjusted daily prices for a small cross-asset universe, estimates realized volatility and drawdown, and compares historical VaR/CVaR across calm and stressed regimes.
+This laboratory studies equity (SPY), Treasury-duration (TLT), and gold (GLD)
+returns while using the VIX index only as an observable regime signal. It implements
+two fully timestamped strategies:
+
+1. a 10% SPY volatility target whose date-t exposure uses realized volatility
+   estimated only through date t-1;
+2. a long-only cross-asset inverse-volatility portfolio whose weights use a lagged
+   63-day window.
+
+Both charge two basis points per unit of turnover. Outputs include unconditional and
+regime-conditional risk, VaR/Expected Shortfall, drawdowns, weights, turnover,
+strategy summaries, and publication-quality figures.
 
 ## Research questions
 
-1. How different are equity, bond, gold, and volatility-proxy losses at the 95% and 99% levels?
-2. Does a volatility-targeted portfolio reduce drawdown without hiding tail dependence?
-3. Which conclusions survive a change in sample period and data source?
+- How do conditional equity, duration, and gold risks change when yesterday's VIX is
+  above its trailing 75th percentile?
+- Does volatility targeting reduce drawdown after lower average exposure and costs
+  are made visible?
+- Does inverse-volatility allocation diversify tails, or mainly redistribute
+  ordinary volatility?
 
-## Data provenance
+## Data and timing
 
-The default source is Yahoo Finance through `yfinance`, using adjusted close prices for `SPY`, `TLT`, `GLD`, and `^VIX` from 2010 onward. The script records the download timestamp and source in `data/market_prices.csv`. If the network is unavailable, it creates a deterministic synthetic geometric-Brownian-motion panel so the educational pipeline remains executable; synthetic output is marked in the report and must never be presented as market evidence.
+The default source is Yahoo Finance adjusted close through yfinance, requested from
+2010 onward. The convenience feed is suitable for an open educational prototype,
+not a substitute for licensed point-in-time market data. The script stores the
+returned panel and a provenance manifest in the output folder.
+
+If download fails, the pipeline creates a deterministic correlated Student-t panel
+and labels every run as synthetic. Synthetic results validate code only and must
+never be presented as market evidence.
+
+The VIX is not treated as an investable total-return asset. All regime and volatility
+forecasts are shifted one observation before they affect a return.
 
 ## Run
 
-```powershell
-python projects/regime_risk/run_research.py
-```
+    python projects/regime_risk/run_research.py
 
-Outputs are written to `projects/regime_risk/output/`. This is educational research, not investment advice. Historical risk estimates are model- and sample-dependent.
+Key outputs are strategy_summary.csv, regime_summary.csv, strategy_wealth.png,
+rolling_volatility.png, and provenance.txt.

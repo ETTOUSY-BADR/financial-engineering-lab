@@ -1,0 +1,450 @@
+\chapter{Notation and Mathematical Reference}
+
+\section{Core notation}
+
+\begin{longtable}{p{0.20\textwidth}p{0.70\textwidth}}
+\toprule
+Symbol & Meaning\\
+\midrule
+$(\Omega,\F,\Prob)$ & physical probability space\\
+$(\F_t)$ & information filtration\\
+$\Q$ & equivalent pricing measure, with numeraire understood\\
+$\E_t[\cdot]$ & conditional expectation given $\F_t$\\
+$X^\transpose$ & transpose of vector or matrix\\
+$A\succeq0$ & positive semidefinite matrix\\
+$\norm{x}_p$ & $\ell_p$ norm\\
+$\ind_A$ & indicator of event $A$\\
+$P(t,T)$ & time-$t$ price of a zero-coupon payment of one at $T$\\
+$R_t,r_t$ & simple gross/net return as defined locally; log return is stated\\
+$M_{t+1}$ & stochastic discount factor\\
+$W^\Prob,W^\Q$ & Brownian motion under physical and pricing measures\\
+$\VaR_\alpha,\ES_\alpha$ & loss quantile and tail average at confidence $\alpha$\\
+$\widehat\theta$ & estimate; population parameter has no hat\\
+$\Rightarrow,\plim$ & convergence in distribution and probability limit\\
+\bottomrule
+\end{longtable}
+
+\section{Matrix identities}
+
+For conformable matrices:
+\[
+(AB)^\transpose=B^\transpose A^\transpose,\qquad
+(AB)^{-1}=B^{-1}A^{-1},
+\]
+\[
+\frac{\partial}{\partial x}(a^\transpose x)=a,\qquad
+\frac{\partial}{\partial x}(x^\transpose Ax)=(A+A^\transpose)x.
+\]
+If $A=A^\transpose$, the last gradient is $2Ax$.
+
+The Sherman--Morrison formula is
+\[
+(A+uv^\transpose)^{-1}
+=A^{-1}-
+\frac{A^{-1}uv^\transpose A^{-1}}{1+v^\transpose A^{-1}u},
+\]
+when denominator is nonzero. Woodbury generalizes:
+\[
+(A+UCV)^{-1}
+=A^{-1}-A^{-1}U(C^{-1}+VA^{-1}U)^{-1}VA^{-1}.
+\]
+These identities accelerate factor-covariance inversions and clarify shrinkage.
+
+For a block Gaussian covariance, the Schur complement appears in conditional
+variance:
+\[
+\Var(Y\mid X)=
+\Sigma_{YY}-\Sigma_{YX}\Sigma_{XX}^{-1}\Sigma_{XY}.
+\]
+
+\section{Calculus identities}
+
+Chain rule:
+$D(f\circ g)(x)=Df(g(x))Dg(x)$. Product Itô rule:
+\[
+\dd(X_tY_t)=X_t\dd Y_t+Y_t\dd X_t+\dd\langle X,Y\rangle_t.
+\]
+Leibniz integral differentiation, under domination:
+\[
+\frac{\dd}{\dd\theta}\int_{a(\theta)}^{b(\theta)}
+f(x,\theta)\dd x
+=f(b,\theta)b'-f(a,\theta)a'
++\int_a^b\partial_\theta f(x,\theta)\dd x.
+\]
+
+Euler's theorem: if differentiable $f(cx)=c^kf(x)$ for $c>0$, then
+$x^\transpose\nabla f(x)=kf(x)$.
+
+\section{Convex-analysis identities}
+
+The convex conjugate is
+\[
+f^\ast(y)=\sup_x\{y^\transpose x-f(x)\}.
+\]
+Fenchel--Young inequality:
+$f(x)+f^\ast(y)\geq x^\transpose y$, with equality when
+$y\in\partial f(x)$. For $f(x)=\frac12x^\transpose Ax$ with $A\succ0$,
+$f^\ast(y)=\frac12y^\transpose A^{-1}y$.
+
+The subdifferential of $\abs{x}$ is $\{-1\}$ for $x<0$, $[-1,1]$ for $x=0$, and
+$\{1\}$ for $x>0$. This kink permits lasso coefficients to be exactly zero.
+
+
+\chapter{Distribution and Statistical Formula Sheet}
+
+\section{Selected univariate distributions}
+
+\begin{longtable}{p{0.20\textwidth}p{0.25\textwidth}p{0.19\textwidth}p{0.20\textwidth}}
+\toprule
+Law & Support/density or mass & Mean & Variance\\
+\midrule
+Bernoulli & $p;\ x\in\{0,1\}$ & $p$ & $p(1-p)$\\
+Poisson & $\lambda;\ k\in\N_0$ & $\lambda$ & $\lambda$\\
+Exponential & $\lambda;\ x\geq0$ & $1/\lambda$ & $1/\lambda^2$\\
+Normal & $\mu,\sigma^2;\ x\in\R$ & $\mu$ & $\sigma^2$\\
+Lognormal & $\mu,\sigma^2;\ x>0$ & $\e^{\mu+\sigma^2/2}$ &
+$(\e^{\sigma^2}-1)\e^{2\mu+\sigma^2}$\\
+Student $t_\nu$ & $\R$, polynomial tail & $0$ if $\nu>1$ &
+$\nu/(\nu-2)$ if $\nu>2$\\
+Gamma & $a,b;\ x>0$, rate $b$ & $a/b$ & $a/b^2$\\
+Beta & $a,b;\ 0<x<1$ & $a/(a+b)$ &
+$ab/[(a+b)^2(a+b+1)]$\\
+\bottomrule
+\end{longtable}
+
+\section{Normal identities}
+
+If $X\sim N(\mu,\sigma^2)$,
+\[
+\E[\e^{tX}]=\e^{t\mu+\frac12t^2\sigma^2}.
+\]
+For $Z\sim N(0,1)$,
+\[
+\E[Z\ind_{\{Z>a\}}]=\phi(a),\qquad
+\E[Z\mid Z>a]=\frac{\phi(a)}{1-\Phi(a)}.
+\]
+For jointly Gaussian $(X,Y)$,
+\[
+\E[Y\mid X=x]=
+\mu_Y+\Sigma_{YX}\Sigma_{XX}^{-1}(x-\mu_X),
+\]
+\[
+\Var(Y\mid X)=
+\Sigma_{YY}-\Sigma_{YX}\Sigma_{XX}^{-1}\Sigma_{XY}.
+\]
+
+\section{Likelihood reference}
+
+For log likelihood $\ell_n(\theta)=\sum_i\log p(Y_i;\theta)$, score is
+$s_n(\theta)=\partial\ell_n/\partial\theta$ and observed information is
+$-\partial^2\ell_n/\partial\theta\partial\theta^\transpose$. Under correct
+regularity,
+\[
+\sqrt n(\widehat\theta-\theta_0)
+\Rightarrow N(0,I(\theta_0)^{-1}),
+\quad
+I(\theta_0)=\E[s_i(\theta_0)s_i(\theta_0)^\transpose].
+\]
+Under misspecification, quasi-MLE targets the Kullback--Leibler projection and uses
+sandwich covariance $H^{-1}JH^{-1}$.
+
+\section{Information criteria and scoring rules}
+
+\[
+\mathrm{AIC}=-2\ell(\widehat\theta)+2k,\qquad
+\mathrm{BIC}=-2\ell(\widehat\theta)+k\log n.
+\]
+For density forecast $p_t$, log score is $-\log p_t(y_t)$. For quantile $q$,
+pinball loss is $(\alpha-\ind_{\{y\leq q\}})(y-q)$. For probability $p$ and binary
+outcome $y$, Brier score is $(p-y)^2$. Proper scores encourage honest probabilistic
+forecasts under their target functional.
+
+\section{Bootstrap choices}
+
+\begin{longtable}{p{0.24\textwidth}p{0.30\textwidth}p{0.34\textwidth}}
+\toprule
+Method & Preserves & Main caution\\
+\midrule
+iid bootstrap & empirical marginal law & destroys serial dependence\\
+moving block & local serial dependence & block-boundary and length choice\\
+stationary bootstrap & random-length dependence & tuning expected block length\\
+residual bootstrap & fitted model structure & model must capture dependence\\
+wild bootstrap & heteroskedastic regression & cluster/time variants differ\\
+cross-sectional cluster & within-cluster dependence & needs enough clusters\\
+\bottomrule
+\end{longtable}
+
+
+\chapter{Finance Formula Sheet}
+
+\section{Returns and compounding}
+
+\[
+R_{t}^{\mathrm{simple}}=\frac{P_t+D_t}{P_{t-1}}-1,\qquad
+r_t=\log(1+R_t).
+\]
+\[
+1+R_{0:T}=\prod_{t=1}^T(1+R_t),\qquad
+r_{0:T}=\sum_{t=1}^Tr_t.
+\]
+For small returns, $r\approx R-\frac12R^2$. Arithmetic mean exceeds geometric mean
+by approximately half the variance under a small-return lognormal approximation.
+
+\section{Portfolio}
+
+\[
+\mu_p=w^\transpose\mu,\qquad
+\sigma_p^2=w^\transpose\Sigma w.
+\]
+\[
+w_{\mathrm{GMV}}=
+\frac{\Sigma^{-1}\ones}{\ones^\transpose\Sigma^{-1}\ones},
+\qquad
+w_{\mathrm{tan}}\propto\Sigma^{-1}(\mu-r_f\ones).
+\]
+\[
+\beta_i=\frac{\Cov(R_i,R_M)}{\Var(R_M)},\qquad
+\alpha_i=\E[R_i-r_f]-\beta_i\E[R_M-r_f].
+\]
+
+\section{Fixed income}
+
+\[
+P(t,T)=\e^{-y(t,T)(T-t)},\quad
+f(t,T)=-\partial_T\log P(t,T).
+\]
+\[
+\frac{\Delta P}{P}\approx-D\Delta y+\frac12\mathcal C(\Delta y)^2.
+\]
+\[
+K_{\mathrm{swap}}=
+\frac{P(0,T_0)-P(0,T_n)}
+{\sum_i\delta_iP(0,T_i)}.
+\]
+
+\section{Options}
+
+\[
+C-P=S\e^{-qT}-K\e^{-rT}.
+\]
+\[
+C=S\e^{-qT}\Phi(d_1)-K\e^{-rT}\Phi(d_2),\quad
+d_{1,2}=
+\frac{\log(S/K)+(r-q\pm\sigma^2/2)T}{\sigma\sqrt T}.
+\]
+\[
+\Delta_C=\e^{-qT}\Phi(d_1),\quad
+\Gamma=\frac{\e^{-qT}\phi(d_1)}{S\sigma\sqrt T},\quad
+\mathcal V=S\e^{-qT}\phi(d_1)\sqrt T.
+\]
+
+\section{Risk}
+
+\[
+\VaR_\alpha(N(\mu,\sigma^2))=\mu+\sigma z_\alpha,
+\]
+\[
+\ES_\alpha(N(\mu,\sigma^2))
+=\mu+\sigma\frac{\phi(z_\alpha)}{1-\alpha}.
+\]
+\[
+\ES_\alpha(L)=
+\inf_z\left[
+z+\frac{1}{1-\alpha}\E(L-z)^+
+\right].
+\]
+
+\section{Continuous time}
+
+\[
+\dd f(t,X_t)=
+\left(f_t+b f_x+\frac12a^2f_{xx}\right)\dd t
++af_x\dd W_t.
+\]
+\[
+V_t+(r-q)SV_S+\frac12\sigma^2S^2V_{SS}-rV=0.
+\]
+\[
+\frac{\dd\Q}{\dd\Prob}\bigg|_{\F_T}
+=\exp\left(-\int_0^T\theta_t\dd W_t
+-\frac12\int_0^T\theta_t^2\dd t\right).
+\]
+
+
+\chapter{Algorithm Blueprints}
+
+\section{Walk-forward research}
+
+\begin{lstlisting}[language=Python]
+for decision_time in schedule:
+    available = raw[raw.publication_time <= decision_time]
+    train, validation = time_split(available, decision_time)
+    transformer.fit(train.features)
+    model = tune_only_on(train, validation, transformer)
+    prediction = model.predict(features_at(decision_time))
+    order = policy(prediction, positions, risk_limits)
+    fill = execution_model(order, market_after(decision_time))
+    ledger.apply(fill, costs=True, financing=True)
+    audit.append(config_hash, data_hash, prediction, fill)
+\end{lstlisting}
+
+\section{Hamilton filter}
+
+\begin{lstlisting}[language=Python]
+prob_filtered = initial_probability
+loglik = 0.0
+for observation in data:
+    prob_predicted = transition.T @ prob_filtered
+    density = emission_density(observation, parameters)
+    normalizer = density @ prob_predicted
+    prob_filtered = density * prob_predicted / normalizer
+    loglik += log(normalizer)
+\end{lstlisting}
+
+\section{Curve bootstrap}
+
+\begin{lstlisting}[language=Python]
+discounts = {}
+for instrument in maturity_order:
+    known_cashflows = present_value_with(discounts, instrument)
+    discounts[instrument.maturity] = solve_last_discount(
+        instrument.quote, known_cashflows, instrument.conventions
+    )
+validate_positive_discounts(discounts)
+reprice_every_calibration_instrument(discounts)
+\end{lstlisting}
+
+\section{Monte Carlo experiment}
+
+\begin{lstlisting}[language=Python]
+for step_count in grid_sizes:
+    estimates = []
+    for independent_seed in seeds:
+        paths = simulate(model, step_count, paths_per_run, independent_seed)
+        estimates.append(discounted_payoff(paths).mean())
+    report(step_count, mean(estimates), standard_error(estimates))
+compare_grid_bias_and_sampling_error()
+\end{lstlisting}
+
+\section{Model calibration}
+
+\begin{lstlisting}[language=Python]
+quotes = validate_and_clean(raw_quotes)
+for start in multi_starts:
+    fit = constrained_optimizer(
+        objective=bid_ask_scaled_error,
+        start=start,
+        bounds=economic_bounds,
+        analytic_gradient=gradient,
+    )
+    candidates.append(fit)
+best = select_converged(candidates)
+check_residuals_stability_withheld_hedges(best)
+\end{lstlisting}
+
+
+\chapter{Selected Solutions and Proof Hints}
+
+\section{Analysis and linear algebra}
+
+\paragraph{Convex inverse inequality.}
+For positive $X$, apply Jensen to $f(x)=x^{-1}$:
+$(\E X)^{-1}\leq\E[X^{-1}]$. Multiply by $\E X>0$.
+
+\paragraph{Projection matrix.}
+$P_X^\transpose=P_X$ because $X^\transpose X$ is symmetric. Multiplying $P_X$ by
+itself cancels the middle $X^\transpose X$. A symmetric idempotent matrix has
+eigenvalues satisfying $\lambda^2=\lambda$, hence $0$ or $1$.
+
+\paragraph{Pseudoinverse.}
+If $A=U_r\Sigma_rV_r^\transpose$, set
+$A^+=V_r\Sigma_r^{-1}U_r^\transpose$. Every solution of $Ax=b$ has
+$x=A^+b+z$ with $z\in\ker(A)$, orthogonal to $A^+b$, so its norm is minimized at
+$z=0$.
+
+\section{Probability}
+
+\paragraph{Gaussian conditional law.}
+Partition the quadratic form in the joint normal density and complete the square in
+$y$. The remaining center is
+$\mu_Y+\Sigma_{YX}\Sigma_{XX}^{-1}(x-\mu_X)$ and the Schur complement is the
+conditional covariance.
+
+\paragraph{Stochastic exponential.}
+For $f(t,w)=\exp(\sigma w-\sigma^2t/2)$,
+$f_t=-\sigma^2f/2$, $f_w=\sigma f$, and $f_{ww}=\sigma^2f$. Itô drift cancels,
+leaving $\dd f=\sigma f\dd W$. Positivity and expectation one, or an integrability
+argument, establish the martingale.
+
+\section{Econometrics}
+
+\paragraph{Within transformation.}
+Average $y_{it}=\alpha_i+x_{it}^\transpose\beta+u_{it}$ over $t$ and subtract:
+\[
+y_{it}-\bar y_i=(x_{it}-\bar x_i)^\transpose\beta+(u_{it}-\bar u_i).
+\]
+A time-invariant regressor subtracts to zero and is collinear with unit effects.
+
+\paragraph{Overlapping returns.}
+If $R_t^{(k)}=\sum_{j=1}^k r_{t+j}$ with iid $r$, adjacent observations share
+$k-h$ innovations at lag $h<k$, so
+$\Cov(R_t^{(k)},R_{t+h}^{(k)})=(k-h)\sigma^2$. It is zero at $h\geq k$.
+
+\section{Derivatives}
+
+\paragraph{Call convexity.}
+For $K_1<K_2<K_3$ with $K_2$ a convex combination, a butterfly of calls has
+nonnegative terminal payoff. Its initial price must be nonnegative, which is the
+discrete convexity inequality. Take strike spacings to zero for
+$\partial_{KK}C\geq0$.
+
+\paragraph{Geometric Asian.}
+For monitoring dates $t_j$, average log price is Gaussian because it is a linear
+combination of Brownian values. Its mean follows from each log-price mean and its
+variance from
+$\Cov(W_{t_i},W_{t_j})=\min(t_i,t_j)$. Exponentiation produces a lognormal
+geometric average, so the call is a Black-style lognormal expectation with adjusted
+mean and variance.
+
+\section{Portfolio and risk}
+
+\paragraph{Tangency portfolio.}
+Write excess mean as
+$w^\transpose\mu_e=(\Sigma^{1/2}w)^\transpose(\Sigma^{-1/2}\mu_e)$.
+Cauchy--Schwarz bounds squared Sharpe by
+$\mu_e^\transpose\Sigma^{-1}\mu_e$, with equality when
+$\Sigma^{1/2}w$ is proportional to $\Sigma^{-1/2}\mu_e$.
+
+\paragraph{Normal Expected Shortfall.}
+For $L=\mu+\sigma Z$ and $z_\alpha=\Phi^{-1}(\alpha)$,
+\[
+\E[L\mid L\geq\mu+\sigma z_\alpha]
+=\mu+\sigma
+\frac{\int_{z_\alpha}^\infty z\phi(z)\dd z}
+{1-\alpha}.
+\]
+Since $\phi'(z)=-z\phi(z)$, the numerator is $\phi(z_\alpha)$.
+
+\section{Numerical methods}
+
+\paragraph{Control variate.}
+\[
+\Var(X-c(Y-\mu_Y))
+=\Var(X)-2c\Cov(X,Y)+c^2\Var(Y).
+\]
+Differentiate in $c$ to obtain $c^\star=\Cov(X,Y)/\Var(Y)$. Substitution gives
+$\Var(X)(1-\rho^2)$.
+
+\paragraph{Bisection.}
+After $n$ iterations, the containing interval length is $(b-a)/2^n$, so midpoint
+error is at most $(b-a)/2^{n+1}$. Choose
+$n\geq\lceil\log_2((b-a)/(2\varepsilon))\rceil$.
+
+\section{What a complete solution contains}
+
+A complete quantitative solution does more than reach a formula. It states the
+domain, establishes existence and uniqueness when relevant, names the measure and
+information set, checks units, verifies limiting cases, quantifies numerical error,
+and explains the economic interpretation. An empirical solution additionally
+records data provenance, estimator uncertainty, point-in-time validation, costs,
+and failure modes.

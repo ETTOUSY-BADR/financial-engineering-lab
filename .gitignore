@@ -1,8 +1,12 @@
 venv/
+.venv/
 __pycache__/
 .ipynb_checkpoints/
+.pytest_cache/
 *.pyc
 course/*.aux
+course/*.fdb_latexmk
+course/*.fls
 course/*.log
 course/*.out
 course/*.toc

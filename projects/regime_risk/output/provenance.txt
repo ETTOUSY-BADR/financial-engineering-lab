@@ -1,3 +1,10 @@
-Source: Yahoo Finance adjusted close
+Source: Yahoo Finance adjusted close via yfinance
+Requested tickers: SPY, TLT, GLD, ^VIX
+Requested start: 2010-01-01
 Rows: 4189
-Generated UTC: 2026-08-28T00:06:06.152973+00:00
+First observation: 2010-01-04 00:00:00
+Last observation: 2026-08-27 00:00:00
+Generated UTC: 2026-08-28T00:53:36.658719+00:00
+SPY, TLT, and GLD are investable proxies; ^VIX is a signal only.
+Regime uses lagged VIX; every strategy volatility input is lagged.
+Synthetic fallback is for software validation, not market conclusions.

@@ -1,0 +1,342 @@
+\chapter{Stochastic Discount Factors and Equilibrium Pricing}
+
+\begin{objectives}
+Unify asset pricing through stochastic discount factors, derive risk premia and
+no-arbitrage bounds, and connect equilibrium preferences to empirical moments.
+\end{objectives}
+
+\section{The fundamental pricing equation}
+
+For payoff $X_{t+1}$ with price $P_t$, absence of arbitrage under suitable conditions
+implies a positive stochastic discount factor $M_{t+1}$ such that
+\[
+P_t=\E_t[M_{t+1}X_{t+1}].
+\]
+For gross return $R_{i,t+1}=X_{i,t+1}/P_{i,t}$,
+\[
+1=\E_t[M_{t+1}R_{i,t+1}].
+\]
+This equation encompasses consumption-based equilibrium, state-price valuation, and
+equivalent martingale measures.
+
+The risk-free rate obeys $R_{f,t}=1/\E_t[M]$. Therefore
+\[
+\E_t[R_i]-R_f
+=-\frac{\Cov_t(M,R_i)}{\E_t[M]}.
+\]
+Assets that pay when $M$ is high hedge bad states and require lower average returns.
+
+\begin{theorem}[Hansen--Jagannathan bound]
+For any excess return $R_i^e$ priced by $M$,
+\[
+\frac{\sigma_t(M)}{\E_t[M]}
+\geq
+\frac{\abs{\E_t[R_i^e]}}{\sigma_t(R_i^e)}.
+\]
+For a vector of returns, the strongest bound is the maximum conditional Sharpe ratio.
+\end{theorem}
+\begin{proof}
+Pricing gives $\E[M R_i^e]=0$, so
+$\E[R_i^e]=-\Cov(M,R_i^e)/\E[M]$. Apply Cauchy--Schwarz and divide by
+$\sigma(R_i^e)$.
+\end{proof}
+
+The bound is diagnostic: a candidate consumption-based $M$ must be sufficiently
+volatile to price observed Sharpe ratios. It does not identify the true SDF.
+
+\section{Projection and the minimum-variance SDF}
+
+Given gross returns $R$, any SDF can be decomposed into its projection on their span
+plus an orthogonal component. The minimum-second-moment SDF in the payoff span is
+\[
+M^\star=a+b^\transpose R,
+\]
+with coefficients satisfying pricing equations. Unspanned components do not affect
+prices of included assets but can matter for other claims.
+
+In incomplete markets, many SDFs price the observed assets. Empirical asset pricing
+therefore tests a joint hypothesis about the factor representation, conditioning
+information, and set of test assets.
+
+\section{Representative-agent equilibrium}
+
+An agent maximizing $\E_t\sum_j\beta^ju(C_{t+j})$ has
+\[
+M_{t+1}=\beta\frac{u'(C_{t+1})}{u'(C_t)}.
+\]
+For lognormal consumption growth $g_{t+1}=\Delta\log C_{t+1}$ and CRRA utility,
+\[
+\log M_{t+1}=\log\beta-\gamma g_{t+1}.
+\]
+If $(g,r_i)$ are conditionally jointly normal, expected log excess return includes
+consumption covariance and a Jensen term. Smooth aggregate consumption growth makes
+the observed equity premium and low risk-free rate difficult to match with moderate
+risk aversion, the equity-premium and risk-free-rate puzzles.
+
+Extensions introduce habit, recursive utility, long-run risks, rare disasters,
+heterogeneous agents, incomplete markets, or intermediary constraints. Each adds
+state variables and identification demands; better fit alone does not establish the
+mechanism.
+
+\section{Conditional asset pricing}
+
+If instruments $Z_t$ are known at $t$, conditional pricing implies unconditional
+moments
+\[
+\E[(M_{t+1}R_{t+1}-\ones)\otimes Z_t]=0.
+\]
+Generalized method of moments estimates parameters by minimizing
+$g_T(\theta)^\transpose W_Tg_T(\theta)$. Efficient weighting uses the inverse
+long-run covariance of moments, but two-step estimation and weak identification
+affect finite-sample inference.
+
+The overidentifying-restrictions statistic tests whether all sample moments can be
+close to zero. Rejection can reflect the SDF, return data, instruments, or maintained
+regularity. Non-rejection does not prove economic truth.
+
+\section{Entropy and good-deal restrictions}
+
+No-arbitrage price intervals can be wide in incomplete markets. Good-deal bounds
+restrict SDF volatility or admissible Sharpe ratios to exclude implausibly attractive
+unspanned opportunities. Entropy methods choose a pricing measure closest to a
+reference law subject to moment conditions:
+\[
+\min_{\Q} \E^\Prob\left[
+\frac{\dd\Q}{\dd\Prob}\log\frac{\dd\Q}{\dd\Prob}
+\right].
+\]
+This is an additional economic or statistical criterion, not a consequence of
+no-arbitrage.
+
+\section{Problems}
+
+\begin{exercise}[Core: covariance pricing]
+Derive expected excess return from the SDF equation and interpret the sign for an
+insurance-like payoff.
+\end{exercise}
+\begin{exercise}[Core: HJ bound]
+Derive the vector maximum-Sharpe form using the tangency portfolio.
+\end{exercise}
+\begin{exercise}[Advanced: GMM]
+Write moments for a consumption-based model with CRRA utility, derive the Jacobian,
+and describe HAC weighting with quarterly consumption and returns.
+\end{exercise}
+
+
+\chapter{CAPM, Multifactor Models, and Anomalies}
+
+\begin{objectives}
+Derive the CAPM, understand beta and factor-mimicking portfolios, evaluate
+multifactor models cross-sectionally, and conduct anomaly research without common
+biases.
+\end{objectives}
+
+\section{Mean--variance equilibrium}
+
+Suppose investors have homogeneous beliefs over one-period means and covariance,
+can borrow and lend at $R_f$, and choose portfolios by mean and variance. Every
+investor holds a combination of the risk-free asset and the same tangency portfolio.
+Market clearing makes that portfolio the market.
+
+\begin{theorem}[CAPM]
+Under the mean--variance equilibrium assumptions,
+\[
+\E[R_i]-R_f=\beta_i(\E[R_M]-R_f),\qquad
+\beta_i=\frac{\Cov(R_i,R_M)}{\Var(R_M)}.
+\]
+\end{theorem}
+\begin{proof}
+The tangency portfolio first-order condition gives
+$\mu-R_f\ones=\lambda\Sigma w_M$. Component $i$ is
+$\mu_i-R_f=\lambda\Cov(R_i,R_M)$. Multiply by $w_M^\transpose$ and sum to obtain
+$\mu_M-R_f=\lambda\Var(R_M)$; divide.
+\end{proof}
+
+The security market line is a statement about expected return and systematic
+covariance, not total volatility. The zero-beta CAPM adapts the result when risk-free
+borrowing is unavailable.
+
+\section{Time-series beta estimation}
+
+The market model
+\[
+R_{i,t}^e=\alpha_i+\beta_iR_{M,t}^e+\varepsilon_{i,t}
+\]
+estimates beta over a chosen window. Nonsynchronous trading, leverage change,
+regime-dependent covariance, errors in the market proxy, and conditional betas
+complicate interpretation. A statistically nonzero $\alpha$ is a joint rejection of
+model, benchmark, implementation, and sampling assumptions.
+
+\section{Arbitrage pricing theory}
+
+If returns have approximate factor structure
+$R_i=a_i+b_i^\transpose f+\varepsilon_i$ and idiosyncratic risk is diversifiable,
+absence of arbitrage implies expected returns are approximately linear in factor
+loadings:
+\[
+\E[R_i]=\lambda_0+b_i^\transpose\lambda.
+\]
+APT needs fewer preference restrictions than CAPM but does not name the factors.
+Traded factors make $\lambda$ directly tied to factor expected returns; nontraded
+macroeconomic factors need beta-pricing estimation.
+
+\section{Empirical factor models}
+
+Common factor families target size, value, profitability, investment, momentum,
+quality, low risk, carry, and liquidity. A characteristic is an asset attribute used
+to sort; a factor is a return. The distinction matters when a characteristic predicts
+returns without representing covariance risk.
+
+Portfolio construction choices include:
+
+\begin{itemize}
+\item universe and delisting returns;
+\item breakpoint population and exchange;
+\item weighting and rebalancing;
+\item accounting-data publication lags;
+\item microcap and liquidity filters;
+\item neutralization and transaction costs.
+\end{itemize}
+
+Published factor data are excellent benchmarks but do not replace reconstruction
+when the research question concerns implementability.
+
+\section{Cross-sectional tests}
+
+The Fama--MacBeth procedure estimates cross-sectional regressions each period:
+\[
+R_{i,t}=a_t+\beta_i^\transpose\lambda_t+u_{i,t},
+\]
+then averages $\widehat\lambda_t$. Time-series standard errors of the premia must
+handle autocorrelation. Estimated betas introduce errors-in-variables; Shanken-type
+corrections address one component under strong assumptions.
+
+Testing factors on portfolios sorted by the same characteristic can make power and
+interpretation circular. Include diverse test assets, report pricing errors in
+economic units, and compare against nested and nonnested benchmarks.
+
+\section{Anomalies and the research process}
+
+An anomaly may reflect compensation for risk, behavioral mispricing, institutional
+friction, data mining, or implementation error. A credible study:
+
+\begin{enumerate}
+\item states the economic mechanism before examining the test sample;
+\item freezes feature definitions and availability dates;
+\item accounts for delistings, survivorship, and restatements;
+\item uses an out-of-sample or independent-market test;
+\item reports turnover, spread, impact, borrow, and capacity;
+\item compares to simple factor exposures;
+\item publishes failures and sensitivity.
+\end{enumerate}
+
+The probability of an extreme backtest rises with the number and dependence of tried
+strategies. Deflated Sharpe ratios and reality-check procedures attempt selection
+adjustments but require an honest count or model of the search process.
+
+\section{Problems}
+
+\begin{exercise}[Core: CAPM]
+Derive the zero-beta version when there is no risk-free asset but all investors share
+the same efficient frontier.
+\end{exercise}
+\begin{exercise}[Core: factor neutrality]
+Given loading matrix $B$, formulate the closest portfolio to target $w_0$ subject to
+$B^\transpose w=0$ and full investment.
+\end{exercise}
+\begin{exercise}[Advanced: two-pass bias]
+Explain how noisy first-pass beta estimates bias the second-pass risk-premium
+regression. Propose portfolios or instruments that improve precision.
+\end{exercise}
+
+
+\chapter{Return Predictability and Present-Value Relations}
+
+\begin{objectives}
+Derive present-value decompositions, connect valuation ratios to cash-flow and
+discount-rate news, and evaluate predictive regressions with appropriate skepticism.
+\end{objectives}
+
+\section{Log-linear present value}
+
+Let $p_t$ and $d_t$ be log price and dividend. Log return
+$r_{t+1}=\log(P_{t+1}+D_{t+1})-\log P_t$ can be approximated around the average
+dividend-price ratio:
+\[
+r_{t+1}\approx k+\rho p_{t+1}+(1-\rho)d_{t+1}-p_t.
+\]
+Rearranging and iterating under a terminal condition yields
+\[
+d_t-p_t
+\approx -\frac{k}{1-\rho}
++\sum_{j=0}^{\infty}\rho^j
+\left(\E_t r_{t+1+j}-\E_t\Delta d_{t+1+j}\right).
+\]
+A high dividend-price ratio must forecast high future returns, low future dividend
+growth, or both within the approximation.
+
+\section{News decomposition}
+
+Unexpected return can be decomposed into cash-flow news and discount-rate news.
+Prices can fall on good cash-flow news if discount rates rise more. Interpreting a
+price response without separating the two is incomplete.
+
+VAR-based decompositions estimate revisions to long-horizon expectations, so results
+depend on included state variables, persistence, sample, and terminal assumptions.
+
+\section{Predictive regressions}
+
+A standard regression is
+\[
+r_{t+1}=\alpha+\beta x_t+\varepsilon_{t+1}.
+\]
+When $x_t$ is persistent and its innovation correlates with $\varepsilon_{t+1}$,
+finite-sample bias and nonstandard behavior arise. Overlapping long-horizon returns
+create moving-average residuals and mechanically smooth noise.
+
+Out-of-sample $R^2$ relative to historical mean is
+\[
+R^2_{\mathrm{OS}}=
+1-\frac{\sum_t(r_t-\widehat r_t)^2}
+{\sum_t(r_t-\bar r_{t-1})^2}.
+\]
+Small positive values can be economically meaningful for volatile returns, but
+statistical comparison must reflect real-time estimation and model selection.
+
+\section{Economic value}
+
+A mean--variance investor might allocate
+\[
+w_t=\frac{\widehat\mu_t}{\gamma\widehat\sigma_t^2},
+\]
+subject to leverage and turnover constraints. Certainty-equivalent improvement
+evaluates forecasts through a decision. This exercise is sensitive to scaling,
+variance forecast, parameter caps, and costs.
+
+Forecast combinations reduce model-selection risk. Simple equal weighting is a
+strong benchmark; optimal combination weights are themselves estimated and can be
+unstable.
+
+\section{Behavioral and institutional mechanisms}
+
+Underreaction can arise from slow information diffusion or anchoring; overreaction
+from extrapolation or constrained arbitrage. Limits to arbitrage include short-sale
+risk, funding, horizon mismatch, and noise-trader risk. A behavioral narrative must
+make distinct predictions about horizons, investor types, events, or limits; otherwise
+it is an after-the-fact label.
+
+\section{Problems}
+
+\begin{exercise}[Core: present value]
+Complete the iteration of the log-linear return identity and state the no-bubble
+terminal condition.
+\end{exercise}
+\begin{exercise}[Core: overlapping returns]
+Show that a $k$-period overlapping return induces an MA$(k-1)$ structure even when
+one-period returns are iid.
+\end{exercise}
+\begin{exercise}[Research]
+Compare valuation-ratio forecasts against the historical mean using recursive
+estimation. Report statistical loss, certainty equivalent, turnover, and performance
+across predeclared subperiods.
+\end{exercise}

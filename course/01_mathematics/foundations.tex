@@ -1,36 +1,924 @@
-\chapter{Mathematical foundations}
-\section{Probability and information}
-A probability space is $(\Omega,\mathcal{F},\Prob)$, where events in $\mathcal{F}$ receive probabilities. A filtration $(\mathcal{F}_t)_{t\geq0}$ represents information available through time. A random variable $X$ is measurable with respect to $\mathcal{F}_t$ when its value is known at $t$.
+\chapter{Analysis, Calculus, and Convexity}
+
+\begin{objectives}
+Develop the language of sets, limits, continuity, differentiation, and convexity;
+derive approximation and optimality results used throughout finance; and learn to
+separate a formal calculation from a theorem whose assumptions have been verified.
+\end{objectives}
+
+\section{Sets, functions, and proof}
+
+Mathematics starts by fixing the universe in which a claim is made. If $A$ and $B$
+are sets, $A\subseteq B$ means every element of $A$ belongs to $B$. The union,
+intersection, complement, and Cartesian product are denoted $A\cup B$, $A\cap B$,
+$A^c$, and $A\times B$. In probability an outcome lies in a sample space; in
+optimization a decision lies in a feasible set; in econometrics an estimand is a
+functional of a probability law. Confusing these objects produces errors that no
+amount of computation can repair.
+
+\begin{definition}[Function and inverse image]
+A function $f:A\to B$ assigns exactly one $f(x)\in B$ to each $x\in A$. For
+$C\subseteq B$, its inverse image is
+\[
+f^{-1}(C)=\{x\in A:f(x)\in C\}.
+\]
+An inverse function exists on all of $B$ only when $f$ is bijective.
+\end{definition}
+
+Inverse images, rather than ordinary inverses, are fundamental in probability:
+$X^{-1}((-\infty,x])$ is an event even when a random variable $X$ is not one-to-one.
+A proof by contradiction assumes the negation of a statement and derives an
+impossibility. A proof by induction establishes a base case and shows that truth at
+$n$ implies truth at $n+1$. A counterexample defeats a universal claim with one
+admissible case.
+
+\begin{example}[A quantifier matters]
+The statement $\E[XY]=\E[X]\E[Y]$ for all integrable $X,Y$ is false. Take $Y=X$
+with $\Var(X)>0$. The equality would imply $\E[X^2]=\E[X]^2$, hence zero variance.
+The equality does hold under independence. The missing hypothesis is the entire
+difference between a useful proposition and a false slogan.
+\end{example}
+
+\section{Sequences, limits, and completeness}
+
+\begin{definition}[Convergence]
+A sequence $(x_n)$ in $\R$ converges to $x$ if for every $\varepsilon>0$ there is an
+$N$ such that $n\geq N$ implies $\abs{x_n-x}<\varepsilon$. A sequence is Cauchy if
+for every $\varepsilon>0$ there exists $N$ such that $m,n\geq N$ imply
+$\abs{x_m-x_n}<\varepsilon$.
+\end{definition}
+
+The completeness of $\R$ says that every Cauchy sequence of real numbers converges
+to a real number. It supports existence arguments, numerical convergence, and the
+construction of integrals. A bounded monotone sequence converges. Compactness is the
+multidimensional workhorse: in $\R^n$, a set is compact exactly when it is closed and
+bounded.
+
+\begin{theorem}[Extreme-value theorem]
+If $K\subset\R^n$ is nonempty and compact and $f:K\to\R$ is continuous, then $f$
+attains both a minimum and a maximum on $K$.
+\end{theorem}
+\begin{proof}
+Let $m=\inf_{x\in K}f(x)$ and choose $x_k\in K$ with $f(x_k)\downarrow m$.
+Compactness gives a convergent subsequence $x_{k_j}\to x^\star\in K$. Continuity
+implies $f(x_{k_j})\to f(x^\star)$, so $f(x^\star)=m$. Apply the same argument to
+$-f$ for the maximum.
+\end{proof}
+
+Existence is not uniqueness and uniqueness is not computational stability. A
+portfolio objective may attain a minimum while having many minimizers; a unique
+minimum may move dramatically under a small change in expected returns.
+
+\section{Continuity and differentiation}
+
+A function $f:\R^n\to\R^m$ is continuous at $x$ when $x_k\to x$ implies
+$f(x_k)\to f(x)$. For scalar $f$, differentiability at $x$ means there is a linear
+map represented by the gradient $\nabla f(x)$ such that
+\[
+f(x+h)=f(x)+\nabla f(x)^\transpose h+o(\norm{h}).
+\]
+For a vector-valued function the derivative is its Jacobian. The Hessian
+$\nabla^2f(x)$ collects second partial derivatives.
+
+\begin{theorem}[Multivariate Taylor formula]
+If $f$ is three times continuously differentiable on a neighborhood of the segment
+between $x$ and $x+h$, then
+\[
+f(x+h)=f(x)+\nabla f(x)^\transpose h+
+\frac12h^\transpose\nabla^2f(x)h+R_3,
+\qquad \abs{R_3}\leq C\norm{h}^3
+\]
+for a finite $C$ determined by third derivatives on that segment.
+\end{theorem}
+
+Delta--gamma risk is this theorem applied to a derivative value $V(S)$:
+\[
+\Delta V\approx \Delta^\transpose\Delta S+
+\frac12\Delta S^\transpose\Gamma\Delta S.
+\]
+The approximation is local. Large jumps, barrier crossings, volatility moves, and
+time decay can make the omitted terms economically decisive.
+
+\begin{example}[Duration and convexity]
+For a bond price $P(y)=\sum_{k=1}^n C_k\e^{-yt_k}$,
+\[
+\frac{\Delta P}{P}\approx
+-D_{\mathrm{mod}}\Delta y+\frac12\mathcal C(\Delta y)^2,\quad
+D_{\mathrm{mod}}=-\frac{P'(y)}{P(y)},\quad
+\mathcal C=\frac{P''(y)}{P(y)}.
+\]
+The first-order term loses value when yields rise; positive convexity offsets part
+of the loss for moves of either sign.
+\end{example}
+
+\section{Convex sets and convex functions}
+
+\begin{definition}[Convexity]
+A set $C\subseteq\R^n$ is convex if $\theta x+(1-\theta)y\in C$ for all $x,y\in C$
+and $\theta\in[0,1]$. A function $f:C\to\R$ is convex when
+\[
+f(\theta x+(1-\theta)y)\leq\theta f(x)+(1-\theta)f(y).
+\]
+It is strictly convex when the inequality is strict for distinct $x,y$ and
+$\theta\in(0,1)$.
+\end{definition}
+
+\begin{theorem}[First-order characterization]
+Let $C$ be open and convex and let $f:C\to\R$ be differentiable. Then $f$ is convex
+if and only if
+\[
+f(y)\geq f(x)+\nabla f(x)^\transpose(y-x)
+\quad\text{for every }x,y\in C.
+\]
+\end{theorem}
+\begin{proof}
+If $f$ is convex, apply convexity to $x+t(y-x)$, rearrange, divide by $t>0$, and let
+$t\downarrow0$. Conversely, define $g(t)=f(x+t(y-x))$. The proposed inequality
+applied along the segment makes $g'$ nondecreasing; integrating from $0$ to
+$\theta$ and from $\theta$ to $1$ gives the chord inequality.
+\end{proof}
+
+If $f$ is twice continuously differentiable, convexity is equivalent to
+$\nabla^2f(x)\succeq0$ everywhere. Jensen's inequality is the probabilistic face of
+convexity.
+
+\begin{theorem}[Jensen's inequality]
+For integrable $X$ and convex $f$ with $f(X)$ integrable,
+\[
+f(\E[X])\leq\E[f(X)].
+\]
+\end{theorem}
+\begin{proof}
+At an interior point $m=\E[X]$, a convex function has a supporting affine function:
+$f(x)\geq f(m)+a(x-m)$. Take expectations. Boundary cases follow by approximation.
+\end{proof}
+
+Jensen explains why volatility affects nonlinear payoffs. For the convex call payoff
+$f(S_T)=(S_T-K)^+$, dispersion can increase expected payoff even when the mean
+terminal price is fixed. It also explains why $\E[\log W]\leq\log\E[W]$: arithmetic
+average wealth and long-run geometric growth answer different questions.
+
+\section{Implicit functions and comparative statics}
+
+Suppose $F(x,\theta)=0$ defines a calibrated parameter $x$ as data or hyperparameter
+$\theta$ changes. If $F$ is continuously differentiable and $F_x\neq0$, the implicit
+function theorem gives
+\[
+\frac{\dd x}{\dd\theta}=-\frac{F_\theta}{F_x}.
+\]
+For vector equations, replace division by $F_x^{-1}$. Near singularity, comparative
+statics explode: this is a mathematical definition of weak identification or
+ill-conditioned calibration.
+
+\section{Problems}
+
+\begin{exercise}[Core: Taylor risk]
+For $V(S,\sigma,t)$, write the complete second-order expansion in $\Delta S$ and
+$\Delta\sigma$ and the first-order expansion in $\Delta t$. Identify delta, gamma,
+vega, vanna, and volga. Explain which cross term is omitted by a delta--gamma
+approximation.
+\end{exercise}
+\begin{exercise}[Core: convexity]
+Show that $x\mapsto-\log x$ is strictly convex on $\Rplus$. Use Jensen's inequality
+to prove $\E[X]\,\E[X^{-1}]\geq1$ for positive $X$ with finite expectations.
+\end{exercise}
+\begin{exercise}[Advanced: existence]
+Let $C=\{w:\ones^\transpose w=1,\ \norm{w}\leq M\}$. Prove that a continuous
+portfolio loss functional attains its minimum on $C$. Which hypothesis fails if the
+leverage bound is removed?
+\end{exercise}
+
+
+\chapter{Linear Algebra, Geometry, and Factor Structure}
+
+\begin{objectives}
+Use vector spaces, projections, eigenvalues, singular values, and positive
+semidefinite matrices to understand portfolios, regressions, factors, and numerical
+conditioning.
+\end{objectives}
+
+\section{Vector spaces and norms}
+
+A vector space is a set closed under vector addition and scalar multiplication.
+The span of columns of $A\in\R^{m\times n}$ is its column space; the null space is
+$\{x:Ax=0\}$. The rank--nullity theorem gives
+\[
+\rank(A)+\dim\ker(A)=n.
+\]
+Thus a system $Ax=b$ is uniquely solvable for every $b$ only when a square $A$ has
+full rank.
+
+A norm satisfies positivity, homogeneity, and the triangle inequality. Common norms
+are $\norm{x}_1=\sum_i\abs{x_i}$, $\norm{x}_2=(x^\transpose x)^{1/2}$, and
+$\norm{x}_\infty=\max_i\abs{x_i}$. They encode different geometry. An $\ell_1$
+constraint encourages sparse exposures; an $\ell_2$ constraint spreads shrinkage;
+an $\ell_\infty$ constraint caps each coordinate.
+
+\begin{theorem}[Cauchy--Schwarz]
+For an inner-product space,
+\[
+\abs{\inner{x}{y}}\leq\norm{x}\norm{y}.
+\]
+Equality holds exactly when $x$ and $y$ are linearly dependent.
+\end{theorem}
+\begin{proof}
+For $y\neq0$, nonnegativity of
+$\norm{x-t y}^2$ at $t=\inner{x}{y}/\norm{y}^2$ yields
+$0\leq\norm{x}^2-\abs{\inner{x}{y}}^2/\norm{y}^2$.
+\end{proof}
+
+Cauchy--Schwarz proves the upper bound $\abs{\Corr(X,Y)}\leq1$ and provides the
+geometry of the maximum Sharpe ratio.
+
+\section{Orthogonal projection and least squares}
+
+Let $X\in\R^{n\times k}$ have full column rank. The least-squares problem
+$\min_b\norm{y-Xb}_2^2$ has normal equations $X^\transpose Xb=X^\transpose y$.
+Hence
+\[
+\widehat b=(X^\transpose X)^{-1}X^\transpose y,\qquad
+\widehat y=P_Xy,\quad
+P_X=X(X^\transpose X)^{-1}X^\transpose.
+\]
+The residual $M_Xy=(I-P_X)y$ is orthogonal to every column of $X$.
+
+\begin{proposition}[Frisch--Waugh--Lovell]
+Partition $X=[X_1\ X_2]$. The coefficient on $X_2$ in the regression of $y$ on
+$X_1,X_2$ equals the regression coefficient of $M_1y$ on $M_1X_2$, where
+$M_1=I-P_{X_1}$.
+\end{proposition}
+\begin{proof}
+Minimize $\norm{y-X_1b_1-X_2b_2}^2$ first over $b_1$ for fixed $b_2$. The minimized
+residual is $M_1(y-X_2b_2)$. Differentiating its squared norm in $b_2$ gives the
+partialled-out regression.
+\end{proof}
+
+The theorem clarifies what a regression coefficient means: it uses variation in a
+regressor left after its linear association with controls has been removed. It does
+not, by itself, make that residual variation exogenous.
+
+\section{Eigenvalues, covariance, and principal components}
+
+A symmetric matrix $A$ admits an orthogonal eigendecomposition
+$A=Q\Lambda Q^\transpose$. It is positive semidefinite when
+$x^\transpose Ax\geq0$ for all $x$, equivalently when every eigenvalue is
+nonnegative. A covariance matrix is positive semidefinite because
+\[
+a^\transpose\Sigma a=\Var(a^\transpose X)\geq0.
+\]
+
+\begin{theorem}[Spectral theorem]
+Every real symmetric $A$ has an orthonormal basis of eigenvectors and real
+eigenvalues. Consequently $A=Q\Lambda Q^\transpose$ for orthogonal $Q$.
+\end{theorem}
+
+For centered data matrix $R$, principal component analysis diagonalizes
+$S=R^\transpose R/(T-1)$. The first loading $q_1$ solves
+\[
+\max_{\norm{q}=1}q^\transpose Sq
+\]
+and equals the eigenvector associated with the largest eigenvalue.
+
+\begin{proof}
+Write $q=Qa$ in the eigenbasis. Then
+$q^\transpose Sq=\sum_i\lambda_i a_i^2\leq\lambda_1\sum_i a_i^2=\lambda_1$.
+Equality obtains at $q=q_1$.
+\end{proof}
+
+In a yield curve, the first three empirical components are often interpreted as
+level, slope, and curvature. Those labels are sample-dependent summaries, not
+structural shocks. Sign is arbitrary, component order can change, and standard PCA
+ignores measurement error and dynamics.
+
+\section{Singular values and conditioning}
+
+Any $A\in\R^{m\times n}$ has a singular-value decomposition
+$A=U\Sigma V^\transpose$. The nonzero singular values are square roots of the
+positive eigenvalues of $A^\transpose A$. The two-norm condition number is
+$\kappa_2(A)=\sigma_{\max}/\sigma_{\min}$ for full-rank $A$.
+
+If $\kappa_2(A)$ is large, small perturbations in inputs can produce large changes in
+solutions. Expected-return optimization, high-dimensional regression, and implied
+parameter inversion are commonly ill-conditioned. Regularization changes the
+question to stabilize the answer:
+\[
+\widehat\beta_{\text{ridge}}
+=\argmin_\beta\{\norm{y-X\beta}^2+\lambda\norm{\beta}^2\}
+=(X^\transpose X+\lambda I)^{-1}X^\transpose y.
+\]
+
+\begin{warning}
+An invertible sample covariance matrix is not necessarily reliable. When the number
+of assets is close to the sample length, its smallest eigenvalues are estimated with
+enormous relative error. Optimization amplifies precisely those errors.
+\end{warning}
+
+\section{Factor models}
+
+A linear factor representation is
+\[
+r_t=\alpha+Bf_t+\varepsilon_t,\qquad
+\E[\varepsilon_t\mid f_t]=0,\qquad
+\Cov(\varepsilon_t,f_t)=0.
+\]
+It implies
+\[
+\Sigma_r=B\Sigma_fB^\transpose+\Sigma_\varepsilon.
+\]
+This low-rank plus idiosyncratic structure reduces estimation dimension and makes
+risk attribution possible. It does not decide whether factors are traded, causal,
+or merely statistical.
+
+\begin{example}[Marginal contribution to variance]
+For portfolio variance $\sigma_p^2=w^\transpose\Sigma w$,
+\[
+\frac{\partial\sigma_p}{\partial w_i}
+=\frac{(\Sigma w)_i}{\sigma_p},\qquad
+RC_i=w_i\frac{(\Sigma w)_i}{\sigma_p}.
+\]
+Euler's theorem for homogeneous functions gives $\sum_iRC_i=\sigma_p$.
+\end{example}
+
+\section{Problems}
+
+\begin{exercise}[Core: projection]
+Prove that $P_X=P_X^\transpose=P_X^2$. Show that $\rank(P_X)=k$ and its eigenvalues
+are $0$ or $1$.
+\end{exercise}
+\begin{exercise}[Core: covariance]
+For a two-asset covariance matrix, derive the condition under which an asset with
+positive standalone volatility reduces portfolio variance at the margin.
+\end{exercise}
+\begin{exercise}[Advanced: SVD]
+Use the SVD to derive the Moore--Penrose pseudoinverse and show that it gives the
+minimum-norm solution to $Ax=b$ when the system has infinitely many solutions.
+\end{exercise}
+
+
+\chapter{Optimization and Dynamic Decisions}
+
+\begin{objectives}
+Derive first- and second-order conditions, understand constraint qualifications and
+duality, solve canonical portfolio programs, and formulate sequential decisions by
+dynamic programming.
+\end{objectives}
+
+\section{Unconstrained and equality-constrained optimization}
+
+At an interior local minimum of differentiable $f$, $\nabla f(x^\star)=0$. If $f$ is
+twice differentiable, a positive definite Hessian at a stationary point is
+sufficient for a strict local minimum. Convexity upgrades local optimality to global
+optimality.
+
+For
+\[
+\min_x f(x)\quad\text{subject to}\quad h(x)=0,
+\]
+the Lagrangian is $\mathcal L(x,\lambda)=f(x)+\lambda^\transpose h(x)$.
+When gradients of active constraints are linearly independent, a local solution
+satisfies $\nabla_x\mathcal L=0$ and $h(x)=0$.
+
+\begin{example}[Global minimum-variance portfolio]
+For positive definite $\Sigma$,
+\[
+\min_w\frac12w^\transpose\Sigma w
+\quad\text{s.t.}\quad\ones^\transpose w=1.
+\]
+Stationarity gives $\Sigma w-\lambda\ones=0$. Enforcing the constraint yields
+\[
+w_{\mathrm{GMV}}=
+\frac{\Sigma^{-1}\ones}{\ones^\transpose\Sigma^{-1}\ones},
+\qquad
+\sigma_{\mathrm{GMV}}^2=
+\frac{1}{\ones^\transpose\Sigma^{-1}\ones}.
+\]
+\end{example}
+
+For a target mean $m$, define
+\[
+A=\ones^\transpose\Sigma^{-1}\ones,\quad
+B=\ones^\transpose\Sigma^{-1}\mu,\quad
+C=\mu^\transpose\Sigma^{-1}\mu,\quad D=AC-B^2.
+\]
+When $D>0$, the efficient-frontier variance is
+$\sigma^2(m)=(Am^2-2Bm+C)/D$.
+
+\section{Inequality constraints and KKT conditions}
+
+Consider convex $f,g_i$ and affine $h$:
+\[
+\min_x f(x)\quad\text{s.t.}\quad g_i(x)\leq0,\ h(x)=0.
+\]
+The Karush--Kuhn--Tucker conditions are primal feasibility, dual feasibility
+$\lambda_i\geq0$, stationarity, and complementary slackness
+$\lambda_i g_i(x)=0$.
+
+\begin{theorem}[KKT sufficiency]
+For a convex differentiable program, any primal--dual point satisfying the KKT
+conditions is globally optimal. Under Slater's condition, KKT conditions are also
+necessary and strong duality holds.
+\end{theorem}
+\begin{proof}
+Convexity gives
+$f(y)\geq f(x^\star)+\nabla f(x^\star)^\transpose(y-x^\star)$.
+Substitute stationarity. Convexity of active $g_i$, feasibility, dual feasibility,
+and complementary slackness make the remaining expression nonnegative for every
+feasible $y$.
+\end{proof}
+
+The multiplier is a shadow price: under regularity, it measures the marginal change
+in optimized value when a constraint is relaxed. In a risk limit, this quantity is
+economically informative only if units and sign conventions are explicit.
+
+\section{Duality and robust optimization}
+
+The Lagrange dual function $q(\lambda,\nu)=\inf_x\mathcal L(x,\lambda,\nu)$ provides
+a lower bound on a minimization problem. Maximizing that lower bound is the dual
+problem. The primal--dual gap is a numerical certificate when strong duality holds.
+
+Robust optimization replaces a single estimated input with an uncertainty set.
+If $\mu\in\{\widehat\mu+u:u^\transpose\Omega^{-1}u\leq\delta^2\}$, then
+\[
+\min_{\mu}\ w^\transpose\mu
+=w^\transpose\widehat\mu-\delta\sqrt{w^\transpose\Omega w}.
+\]
+Thus ellipsoidal mean uncertainty produces an explicit penalty for sensitivity to
+the weakest input.
+
+\section{Utility, certainty equivalents, and Kelly growth}
+
+Expected utility ranks uncertain terminal wealth by $\E[u(W)]$. For increasing,
+concave $u$, the Arrow--Pratt coefficient of absolute risk aversion is
+$A(W)=-u''(W)/u'(W)$ and relative risk aversion is $R(W)=WA(W)$.
+Exponential utility has constant absolute risk aversion; power utility has constant
+relative risk aversion.
+
+For small zero-mean risk $\widetilde X$ added to wealth $W$, a second-order expansion
+gives the risk premium
+\[
+\pi\approx\frac12A(W)\Var(\widetilde X).
+\]
+With normally distributed return and quadratic or exponential utility, maximizing a
+certainty equivalent leads to mean--variance form.
+
+Log utility maximizes expected logarithmic growth. In a one-period approximation
+with risky excess return mean $\mu$ and variance $\sigma^2$, the growth-optimal
+fraction is $f^\star\approx\mu/\sigma^2$. Estimation error, fat tails, leverage
+constraints, and drawdown preferences make fractional Kelly policies more robust in
+practice.
+
+\section{Dynamic programming}
+
+A controlled Markov state evolves as
+$x_{t+1}=g(x_t,a_t,\varepsilon_{t+1})$. With reward $r(x,a)$ and discount $\beta$,
+the value function satisfies the Bellman equation
+\[
+V_t(x)=\sup_{a\in\mathcal A(x)}
+\left\{r_t(x,a)+\beta\E[V_{t+1}(x_{t+1})\mid x_t=x,a_t=a]\right\}.
+\]
+
+\begin{theorem}[Principle of optimality]
+If a policy is optimal from an initial state, its continuation after any reachable
+state is optimal for the remaining subproblem.
+\end{theorem}
+\begin{proof}
+If a continuation were not optimal, replace it by a better continuation while
+keeping earlier actions fixed. This would improve the initial policy, a
+contradiction.
+\end{proof}
+
+Transaction costs make portfolio choice genuinely dynamic because trading today
+changes tomorrow's state. With proportional costs, an inaction region often
+emerges: rebalance only when the benefit exceeds the cost of moving toward the
+frictionless target.
+
+\section{Problems}
+
+\begin{exercise}[Core: efficient frontier]
+Derive the target-return efficient portfolio and verify the formula for its
+variance. What happens when expected returns are proportional to $\ones$?
+\end{exercise}
+\begin{exercise}[Core: KKT]
+Solve a two-asset minimum-variance problem with $w_i\geq0$ and characterize when
+each nonnegativity constraint binds.
+\end{exercise}
+\begin{exercise}[Advanced: robust mean]
+Derive the ellipsoidal worst-case mean by Cauchy--Schwarz after the substitution
+$u=\Omega^{1/2}z$. Interpret $\delta$.
+\end{exercise}
+
+
+\chapter{Probability, Information, and Statistical Limits}
+
+\begin{objectives}
+Construct probability models with sigma-algebras, work with conditional expectation
+and changes of variables, understand modes of convergence, and derive the laws that
+justify estimation.
+\end{objectives}
+
+\section{Probability spaces and random variables}
+
+\begin{definition}[Probability space]
+A probability space is $(\Omega,\F,\Prob)$, where $\Omega$ is the sample space,
+$\F$ is a sigma-algebra, and $\Prob:\F\to[0,1]$ is countably additive with
+$\Prob(\Omega)=1$.
+\end{definition}
+
+A sigma-algebra contains $\Omega$, complements, and countable unions. This closure
+ensures that limits of observable events remain observable. A random variable
+$X:(\Omega,\F)\to(\R,\B(\R))$ is measurable: $X^{-1}(B)\in\F$ for every Borel set
+$B$. Its distribution is the pushforward measure
+$\Prob_X(B)=\Prob(X\in B)$.
+
+For a nonnegative random variable, expectation is defined by approximation with
+simple functions; for general integrable $X$, write $X=X^+-X^-$. This construction
+explains why expectation is linear and why limit-exchange theorems need hypotheses.
+
+\begin{theorem}[Monotone convergence]
+If $0\leq X_n\uparrow X$ almost surely, then $\E[X_n]\uparrow\E[X]$, possibly to
+infinity.
+\end{theorem}
+
+\begin{theorem}[Dominated convergence]
+If $X_n\to X$ almost surely and $\abs{X_n}\leq Y$ for an integrable $Y$, then
+$X$ is integrable and $\E[X_n]\to\E[X]$.
+\end{theorem}
+
+These theorems justify differentiation or limiting operations under an expectation.
+Without domination or uniform integrability, pointwise convergence need not preserve
+prices.
+
+\section{Distributions and transforms}
+
+The distribution function $F_X(x)=\Prob(X\leq x)$ is nondecreasing, right-continuous,
+and has limits $0$ and $1$. If it is absolutely continuous, its derivative is a
+density and
+$\E[g(X)]=\int g(x)f_X(x)\dd x$.
+
+The moment-generating function $M_X(t)=\E[\e^{tX}]$, when finite near zero,
+determines all moments and the distribution. The characteristic function
+$\varphi_X(u)=\E[\e^{iuX}]$ always exists and uniquely determines the law. Fourier
+pricing methods exploit
+\[
+\E[g(X)]=\frac{1}{2\pi}\int_{\R}\widehat g(-u)\varphi_X(u)\dd u
+\]
+when the transform conditions hold.
+
+Key families include Bernoulli and binomial counts; Poisson arrivals; exponential
+waiting times; Gaussian sums; lognormal positive prices; Student distributions with
+heavy tails; and generalized extreme-value laws for maxima. A named distribution is
+a hypothesis, not a property of a ticker.
+
+\begin{example}[Lognormal moments]
+If $X\sim N(m,s^2)$ and $S=\e^X$, then
+\[
+\E[S^k]=\e^{km+\frac12k^2s^2}.
+\]
+Thus $\E[S]=\e^{m+s^2/2}$ and
+$\Var(S)=\e^{2m+s^2}(\e^{s^2}-1)$. The median $\e^m$ is below the mean.
+\end{example}
+
+\section{Conditional expectation}
+
 \begin{definition}[Conditional expectation]
-For integrable $X$, $\E[X\mid\mathcal{G}]$ is the $\mathcal{G}$-measurable random variable satisfying $\E[\1_A\E[X\mid\mathcal{G}]]=\E[\1_AX]$ for every $A\in\mathcal{G}$.
+For integrable $X$ and sub-sigma-algebra $\mathcal G\subseteq\F$,
+$\E[X\mid\mathcal G]$ is the almost-surely unique $\mathcal G$-measurable random
+variable such that
+\[
+\E[\ind_A\E[X\mid\mathcal G]]
+=\E[\ind_AX]\quad\text{for all }A\in\mathcal G.
+\]
 \end{definition}
+
+It is a projection of $X$ onto available information. It is linear, monotone, and
+respects known quantities:
+$\E[ZX\mid\mathcal G]=Z\E[X\mid\mathcal G]$ when $Z$ is bounded and
+$\mathcal G$-measurable.
+
 \begin{theorem}[Tower property]
-If $\mathcal{H}\subseteq\mathcal{G}\subseteq\mathcal{F}$ and $X$ is integrable, then $\E[\E[X\mid\mathcal{G}]\mid\mathcal{H}]=\E[X\mid\mathcal{H}]$ almost surely.
-\end{theorem}
-\section{Linear algebra and optimization}
-For a portfolio $w\in\R^n$ and covariance matrix $\Sigma\succeq0$, variance is $w^\top\Sigma w$. The constrained minimum-variance problem is
+If $\mathcal H\subseteq\mathcal G$, then
 \[
-\min_w w^\top\Sigma w\quad\text{s.t.}\quad \1^\top w=1,\quad \mu^\top w=\mu_0.
+\E[\E[X\mid\mathcal G]\mid\mathcal H]=\E[X\mid\mathcal H].
 \]
-The Lagrangian and first-order conditions are sufficient when the objective is convex and constraints are affine. With only full investment, $w^*=\Sigma^{-1}\1/(\1^\top\Sigma^{-1}\1)$ when $\Sigma$ is positive definite.
-\section{Calculus and differential equations}
-\begin{assumption}[Regular diffusion]
-Let $S_t$ satisfy $\dd S_t=\mu(t,S_t)\dd t+\sigma(t,S_t)\dd W_t$, where coefficients are measurable, Lipschitz in state, and have linear growth.
-\end{assumption}
-\begin{theorem}[Ito's formula]
-For $f\in C^{1,2}$, $\dd f(t,S_t)=\left(f_t+\mu f_s+\tfrac12\sigma^2f_{ss}\right)\dd t+\sigma f_s\dd W_t$.
 \end{theorem}
-The second derivative term is the distinctive feature of stochastic calculus. Applying Ito to $\log S_t$ gives $\dd\log S_t=(\mu-\frac12\sigma^2)\dd t+\sigma\dd W_t$.
-\section{No-arbitrage and change of measure}
-\begin{definition}[Equivalent martingale measure]
-A probability measure $\mathbb{Q}$ is equivalent to $\mathbb{P}$ if they have the same null events. It is risk-neutral for a discounted asset $\widetilde S_t$ when $\widetilde S_t$ is a $\mathbb{Q}$-martingale.
+\begin{proof}
+The left side is $\mathcal H$-measurable. For $A\in\mathcal H\subseteq\mathcal G$,
+apply the defining integral identity twice. Uniqueness completes the proof.
+\end{proof}
+
+\begin{proposition}[Conditional Jensen]
+For convex $\phi$ and suitable integrability,
+\[
+\phi(\E[X\mid\mathcal G])\leq\E[\phi(X)\mid\mathcal G].
+\]
+\end{proposition}
+
+\section{Dependence}
+
+Independence is stronger than zero covariance. Copulas separate marginal
+distributions from dependence: Sklar's theorem represents a joint distribution as
+\[
+F(x_1,\ldots,x_d)=C(F_1(x_1),\ldots,F_d(x_d)).
+\]
+Gaussian copulas have zero asymptotic tail dependence unless correlation is perfect;
+Student copulas can generate symmetric tail dependence. Rank correlations are
+invariant under strictly monotone marginal transformations but still do not fully
+describe joint tails.
+
+\begin{definition}[Tail dependence]
+For continuous $X,Y$, upper-tail dependence is
+\[
+\lambda_U=\lim_{u\uparrow1}
+\Prob\!\left(Y>F_Y^{-1}(u)\mid X>F_X^{-1}(u)\right),
+\]
+when the limit exists. Lower-tail dependence is defined analogously.
 \end{definition}
-\begin{theorem}[Risk-neutral valuation]
-In a complete arbitrage-free market, the time-$t$ value of a payoff $H$ at $T$ is $V_t=\E^{\mathbb{Q}}[e^{-\int_t^T r_u\dd u}H\mid\mathcal{F}_t]$.
+
+\section{Convergence and limit theorems}
+
+Almost-sure convergence implies convergence in probability, which implies
+convergence in distribution. Convergence in $L^p$ is convergence of
+$\E[\abs{X_n-X}^p]$ to zero. Reverse implications require additional conditions.
+
+\begin{theorem}[Weak law of large numbers]
+If $X_1,X_2,\ldots$ are iid with finite mean $\mu$, then
+$\overline X_n\to\mu$ in probability.
 \end{theorem}
-\section{Black--Scholes as a benchmark}
-For constant $r,\sigma$ and no dividends, a European call $C(S,t)$ solves
+\begin{proof}
+When variance is finite, Chebyshev's inequality yields
 \[
-C_t+rSC_s+\tfrac12\sigma^2S^2C_{ss}-rC=0,\quad C(S,T)=(S-K)^+.
+\Prob(\abs{\overline X_n-\mu}>\varepsilon)
+\leq\frac{\Var(X_1)}{n\varepsilon^2}\to0.
 \]
-The closed form is $C=S\Phi(d_1)-Ke^{-r\tau}\Phi(d_2)$, with $d_{1,2}=[\log(S/K)+(r\pm\frac12\sigma^2)\tau]/(\sigma\sqrt{\tau})$. Its assumptions exclude jumps, stochastic volatility, liquidity costs, and model uncertainty; the formula is a benchmark, not a law of nature.
+The finite-mean result follows by truncation.
+\end{proof}
+
+\begin{theorem}[Lindeberg--Lévy central limit theorem]
+For iid variables with mean $\mu$ and variance $0<\sigma^2<\infty$,
+\[
+\sqrt n\,\frac{\overline X_n-\mu}{\sigma}\Rightarrow N(0,1).
+\]
+\end{theorem}
+
+Financial returns are neither exactly iid nor always finite-variance in useful
+samples. Mixing, martingale-difference, and stable-law limit theories address
+different departures. Standard errors must match the dependence structure.
+
+\begin{proposition}[Markov and Chebyshev inequalities]
+For nonnegative $X$ and $a>0$, $\Prob(X\geq a)\leq\E[X]/a$. Hence for finite-variance
+$Y$, $\Prob(\abs{Y-\E Y}\geq a)\leq\Var(Y)/a^2$.
+\end{proposition}
+
+\section{Bayesian updating}
+
+With prior $\pi(\theta)$ and likelihood $p(y\mid\theta)$,
+\[
+\pi(\theta\mid y)
+=\frac{p(y\mid\theta)\pi(\theta)}
+{\int p(y\mid u)\pi(u)\dd u}.
+\]
+Posterior prediction integrates parameter uncertainty:
+$p(\widetilde y\mid y)=\int p(\widetilde y\mid\theta)\pi(\theta\mid y)\dd\theta$.
+This differs from plugging in a point estimate.
+
+\begin{example}[Normal--normal learning]
+If $Y_i\mid\mu\sim N(\mu,\sigma^2)$ and
+$\mu\sim N(m_0,s_0^2)$ with known $\sigma^2$, then the posterior is normal with
+\[
+s_n^{-2}=s_0^{-2}+n\sigma^{-2},\qquad
+m_n=s_n^2(s_0^{-2}m_0+n\sigma^{-2}\overline Y).
+\]
+The posterior mean is precision-weighted shrinkage toward the prior.
+\end{example}
+
+\section{Problems}
+
+\begin{exercise}[Core: conditioning]
+For jointly Gaussian $(X,Y)$, derive $\E[Y\mid X]$ and
+$\Var(Y\mid X)$ by completing the square.
+\end{exercise}
+\begin{exercise}[Core: convergence]
+Construct a sequence that converges in probability but not almost surely. State an
+extra summability condition under which the Borel--Cantelli lemma gives almost-sure
+convergence.
+\end{exercise}
+\begin{exercise}[Advanced: change of variable]
+Derive the density of $Y=g(X)$ for a continuously differentiable monotone $g$ and
+then generalize to finitely many inverse branches.
+\end{exercise}
+
+
+\chapter{Stochastic Processes and Continuous-Time Finance}
+
+\begin{objectives}
+Work with filtrations, martingales, Brownian motion, stochastic integrals, Itô's
+formula, stochastic differential equations, and equivalent changes of measure.
+\end{objectives}
+
+\section{Time, information, and martingales}
+
+A stochastic process is a family $(X_t)_{t\in T}$ of random variables on a common
+probability space. A filtration $(\F_t)$ is increasing: $\F_s\subseteq\F_t$ for
+$s\leq t$. A process is adapted if $X_t$ is $\F_t$-measurable. Predictability is a
+slightly stronger pre-trade measurability condition required of trading integrands.
+
+\begin{definition}[Martingale]
+An adapted integrable process $M$ is a martingale when
+\[
+\E[M_t\mid\F_s]=M_s,\qquad s\leq t.
+\]
+Replacing equality by $\leq$ gives a supermartingale and by $\geq$ a submartingale.
+\end{definition}
+
+Martingale does not mean independent increments, constant paths, or absence of risk.
+It means that conditional on the specified information set, the next expected
+change is zero. A discounted traded price is a martingale only under a suitable
+pricing measure and market assumptions.
+
+\begin{theorem}[Optional stopping, bounded version]
+If $M$ is a martingale and $\tau$ is a bounded stopping time, then
+$\E[M_\tau]=\E[M_0]$.
+\end{theorem}
+\begin{proof}
+For integer time with $\tau\leq N$,
+$M_\tau=M_0+\sum_{t=1}^N(M_t-M_{t-1})\ind_{\{\tau\geq t\}}$.
+The indicator is $\F_{t-1}$-measurable, so every increment has zero expectation.
+Continuous time follows by approximation under the stated regularity.
+\end{proof}
+
+Unbounded stopping rules require uniform integrability or related hypotheses.
+Doubling strategies appear to beat fair games precisely by violating admissibility
+or optional-stopping conditions.
+
+\section{Brownian motion and quadratic variation}
+
+\begin{definition}[Brownian motion]
+A process $W$ is standard Brownian motion if $W_0=0$, paths are continuous,
+increments are independent and stationary, and
+$W_t-W_s\sim N(0,t-s)$ for $t>s$.
+\end{definition}
+
+Brownian paths are almost surely nowhere classically differentiable and have infinite
+total variation on every interval. Yet their quadratic variation is finite:
+\[
+\sum_k(W_{t_{k+1}}-W_{t_k})^2\to t
+\]
+in probability as mesh tends to zero. In differential notation,
+$(\dd W_t)^2=\dd t$, $\dd W_t\,\dd t=0$, and $(\dd t)^2=0$. These are mnemonic
+rules for quadratic covariation, not ordinary infinitesimals.
+
+\section{The Itô integral}
+
+For a simple predictable process
+$H_t=\sum_kH_k\ind_{(t_k,t_{k+1}]}(t)$, define
+\[
+\int_0^T H_t\dd W_t
+=\sum_kH_k(W_{t_{k+1}}-W_{t_k}).
+\]
+The construction extends by completion to square-integrable predictable processes.
+
+\begin{theorem}[Itô isometry]
+If $\E\int_0^T H_t^2\dd t<\infty$, then
+\[
+\E\left[\left(\int_0^TH_t\dd W_t\right)^2\right]
+=\E\int_0^TH_t^2\dd t.
+\]
+\end{theorem}
+\begin{proof}
+For a simple process, expand the squared sum. Cross terms vanish because later
+Brownian increments have conditional mean zero, and diagonal terms equal
+$\E[H_k^2](t_{k+1}-t_k)$. Pass to the $L^2$ limit.
+\end{proof}
+
+The stochastic integral is a martingale under square integrability. It is defined
+with left-endpoint information, encoding that a strategy cannot see the increment it
+is about to trade.
+
+\section{Itô's formula}
+
+\begin{theorem}[Itô's formula]
+If
+$\dd X_t=b(t,X_t)\dd t+a(t,X_t)\dd W_t$ and
+$f\in C^{1,2}$, then
+\[
+\dd f(t,X_t)=
+\left(f_t+bf_x+\frac12a^2f_{xx}\right)\dd t
++af_x\dd W_t.
+\]
+For $d$ dimensions, the second-order term is
+$\frac12\tr(aa^\transpose\nabla^2f)\dd t$.
+\end{theorem}
+
+\begin{proof}[Proof idea]
+Apply a second-order Taylor expansion over a fine partition. Terms in
+$\Delta t^2$ and $\Delta t\Delta W$ vanish in aggregate; the sum of
+$(\Delta W)^2$ converges to elapsed time. Control of the Taylor remainder completes
+the limit.
+\end{proof}
+
+\begin{example}[Geometric Brownian motion]
+If $\dd S_t=\mu S_t\dd t+\sigma S_t\dd W_t$, Itô's formula for $\log S$ gives
+\[
+\dd\log S_t=(\mu-\tfrac12\sigma^2)\dd t+\sigma\dd W_t.
+\]
+Hence
+$S_t=S_0\exp((\mu-\sigma^2/2)t+\sigma W_t)$, which is positive and satisfies
+$\E[S_t]=S_0\e^{\mu t}$.
+\end{example}
+
+\begin{example}[Ornstein--Uhlenbeck process]
+For $\dd X_t=\kappa(\theta-X_t)\dd t+\sigma\dd W_t$,
+\[
+X_t=\theta+(X_0-\theta)\e^{-\kappa t}
++\sigma\int_0^t\e^{-\kappa(t-s)}\dd W_s.
+\]
+It is Gaussian with conditional mean
+$\theta+(X_s-\theta)\e^{-\kappa(t-s)}$ and variance
+$\sigma^2(1-\e^{-2\kappa(t-s)})/(2\kappa)$.
+\end{example}
+
+\section{Existence, generators, and Feynman--Kac}
+
+Global Lipschitz and linear-growth conditions on $b$ and $a$ are sufficient for a
+unique strong SDE solution. Many finance diffusions, including square-root models,
+need more refined results at boundaries.
+
+The infinitesimal generator is
+\[
+\mathcal Lf=b^\transpose\nabla f+
+\frac12\tr(aa^\transpose\nabla^2f).
+\]
+If
+\[
+u(t,x)=\E_{t,x}\left[
+\e^{-\int_t^Tc(X_s)\dd s}g(X_T)
++\int_t^T\e^{-\int_t^sc(X_v)\dd v}q(s,X_s)\dd s
+\right],
+\]
+then under regularity $u$ solves
+$u_t+\mathcal Lu-cu+q=0$ with $u(T,x)=g(x)$. This Feynman--Kac bridge connects
+conditional expectations, pricing, and partial differential equations.
+
+\section{Change of measure}
+
+Let $\theta$ be adapted and satisfy an integrability condition such as Novikov's:
+$\E[\exp(\frac12\int_0^T\theta_t^2\dd t)]<\infty$. Define
+\[
+Z_T=\exp\left(
+-\int_0^T\theta_t\dd W_t-\frac12\int_0^T\theta_t^2\dd t
+\right),\qquad
+\frac{\dd\Q}{\dd\Prob}=Z_T.
+\]
+
+\begin{theorem}[Girsanov]
+Under $\Q$, the process
+$W_t^\Q=W_t+\int_0^t\theta_s\dd s$ is Brownian motion.
+\end{theorem}
+
+If a stock obeys $\dd S/S=\mu\dd t+\sigma\dd W^\Prob$ and the money-market rate is
+$r$, choose $\theta=(\mu-r)/\sigma$. Then under $\Q$,
+$\dd S/S=r\dd t+\sigma\dd W^\Q$. The physical expected return disappears from the
+replication price, while volatility remains.
+
+\begin{warning}
+An equivalent pricing measure is not a forecast distribution. Risk-neutral
+probabilities incorporate risk prices and are designed to price traded payoffs.
+Scenario probabilities for risk management belong under a physical or stressed
+measure.
+\end{warning}
+
+\section{Jumps and semimartingales}
+
+Brownian paths cannot produce discontinuous prices. A jump diffusion may be written
+\[
+\frac{\dd S_t}{S_{t-}}
+=(\mu-\lambda\kappa_J)\dd t+\sigma\dd W_t+(J-1)\dd N_t,
+\]
+where $N$ is Poisson with intensity $\lambda$ and
+$\kappa_J=\E[J-1]$. Jumps alter Itô's formula by adding the exact discontinuity
+$f(S_t)-f(S_{t-})$ rather than a local quadratic approximation.
+
+The general no-arbitrage language uses semimartingales because they support a broad
+class of stochastic integrals while ruling out pathwise schemes that manufacture
+profit from infinite variation.
+
+\section{Problems}
+
+\begin{exercise}[Core: stochastic exponential]
+Use Itô's formula to show that
+$\mathcal E_t=\exp(\sigma W_t-\frac12\sigma^2t)$ is a martingale and solves
+$\dd\mathcal E_t=\sigma\mathcal E_t\dd W_t$.
+\end{exercise}
+\begin{exercise}[Core: generator]
+Find the generator of geometric Brownian motion and use it to verify the backward
+equation for a discounted European payoff.
+\end{exercise}
+\begin{exercise}[Advanced: quadratic covariation]
+For correlated Brownian motions with $\dd\langle W^1,W^2\rangle_t=\rho\dd t$, derive
+the two-dimensional Itô formula and apply it to $X_tY_t$.
+\end{exercise}
+\begin{exercise}[Advanced: measure change]
+Derive the market price of risk in a one-stock complete market. Explain why multiple
+pricing measures generally exist when Brownian risk has more dimensions than traded
+risky assets.
+\end{exercise}

@@ -1,0 +1,706 @@
+\chapter{Numerical Accuracy and Optimization Algorithms}
+
+\begin{objectives}
+Control floating-point and discretization error, solve nonlinear equations and
+optimization problems, and report numerical uncertainty alongside statistical
+uncertainty.
+\end{objectives}
+
+\section{Error taxonomy}
+
+Numerical work contains:
+
+\begin{itemize}
+\item model error from an imperfect representation of the world;
+\item statistical error from finite data;
+\item discretization error from time, space, or quadrature grids;
+\item iteration error from stopping an algorithm;
+\item floating-point error from finite precision;
+\item implementation error from incorrect code.
+\end{itemize}
+
+Increasing Monte Carlo paths reduces sampling error but not model or time-step bias.
+An optimizer tolerance smaller than uncertainty in input quotes adds digits, not
+information.
+
+\section{Floating-point arithmetic}
+
+Machine numbers have finite relative precision. Subtracting nearly equal quantities
+causes catastrophic cancellation. Summing values with different magnitudes loses
+small terms; compensated summation helps. Exponentials overflow and underflow;
+log-sum-exp stabilizes
+\[
+\log\sum_i\e^{x_i}
+=m+\log\sum_i\e^{x_i-m},\quad m=\max_i x_i.
+\]
+
+Comparing floats for exact equality is usually inappropriate. A tolerance should
+reflect scale and the numerical problem, not a universal constant.
+
+\section{Root finding}
+
+Bisection on a continuous $f$ with opposite signs at $a,b$ converges robustly and
+halves interval each iteration. Newton's method
+\[
+x_{k+1}=x_k-\frac{f(x_k)}{f'(x_k)}
+\]
+has local quadratic convergence near a simple root but can diverge or leave the
+domain. Brent's method combines bracketing reliability and interpolation speed.
+
+Implied volatility inversion is monotone for ordinary European options with positive
+vega. First enforce no-arbitrage price bounds, bracket volatility, and handle near
+intrinsic options where vega is tiny.
+
+\section{Gradient-based optimization}
+
+Gradient descent is
+\[
+x_{k+1}=x_k-\eta_k\nabla f(x_k).
+\]
+Newton uses Hessian curvature:
+\[
+x_{k+1}=x_k-\nabla^2f(x_k)^{-1}\nabla f(x_k).
+\]
+Quasi-Newton methods approximate the
+inverse Hessian from gradients. Constrained solvers use active-set, interior-point,
+or sequential quadratic programming ideas.
+
+A convex problem has powerful global guarantees; a calibrated stochastic-volatility
+objective is often nonconvex. Multiple starts, parameter transformations, gradient
+checks, and profile plots are necessary.
+
+\section{Automatic differentiation and checks}
+
+Automatic differentiation applies the chain rule to program operations and can
+produce exact derivatives up to floating point. It differentiates the implemented
+program, including any mistake. Compare analytic, automatic, finite-difference, and
+complex-step derivatives on small cases.
+
+Central finite difference has truncation error $O(h^2)$ but rounding error grows as
+$h$ shrinks. A convergence plot across $h$ reveals the useful region.
+
+\section{Linear systems}
+
+Never form a matrix inverse merely to solve $Ax=b$. Use a factorization: Cholesky
+for positive definite matrices, QR for least squares, SVD for rank deficiency, and
+sparse methods for large structured systems. Report condition numbers or residuals.
+
+\section{Problems}
+
+\begin{exercise}[Core: bisection]
+Prove the interval-error bound after $n$ bisection steps and determine iterations
+needed for a desired implied-volatility tolerance.
+\end{exercise}
+\begin{exercise}[Core: cancellation]
+Derive a numerically stable formula for the smaller root of a quadratic when
+$b^2\gg4ac$.
+\end{exercise}
+\begin{exercise}[Advanced: gradient audit]
+Design a derivative test for a constrained portfolio objective and distinguish
+absolute from relative tolerance near zero.
+\end{exercise}
+
+
+\chapter{Monte Carlo and Variance Reduction}
+
+\begin{objectives}
+Simulate stochastic models, quantify standard errors and time-step bias, use variance
+reduction, and price path-dependent claims with reproducible diagnostics.
+\end{objectives}
+
+\section{Plain Monte Carlo}
+
+For $V=\E[g(X)]$, iid samples give
+\[
+\widehat V_N=\frac1N\sum_{i=1}^Ng(X_i),\qquad
+\widehat{\mathrm{se}}=
+\frac{s_g}{\sqrt N}.
+\]
+The central limit theorem yields an approximate interval
+$\widehat V_N\pm z_{1-\alpha/2}\widehat{\mathrm{se}}$. Halving standard error
+requires roughly four times as many independent paths.
+
+Pseudorandom seeds make a run repeatable. Separate random streams prevent small code
+changes from silently changing every comparison. Common random numbers improve
+precision of differences between scenarios.
+
+\section{Simulating diffusions}
+
+Euler--Maruyama for
+$\dd X_t=b(X_t)\dd t+a(X_t)\dd W_t$ is
+\[
+X_{n+1}=X_n+b(X_n)\Delta t+a(X_n)\sqrt{\Delta t}Z_{n+1}.
+\]
+Under regularity, strong convergence order is typically $1/2$ and weak order $1$.
+Milstein adds derivative terms and can achieve strong order $1$ in scalar settings.
+
+For geometric Brownian motion use its exact transition. Naive Euler can produce
+negative prices. For CIR variance, full truncation, quadratic-exponential, or exact
+transition schemes handle boundaries more reliably.
+
+\begin{definition}[Strong and weak error]
+Strong error measures pathwise approximation such as
+$\E[\abs{X_T-\widehat X_T}]$. Weak error measures expectation error
+$\abs{\E[g(X_T)]-\E[g(\widehat X_T)]}$.
+\end{definition}
+
+Pricing a European payoff needs weak accuracy; hedging, barriers, and exposure paths
+can require stronger path fidelity.
+
+\section{Antithetic variables}
+
+If $Z$ is standard normal, simulate $g(Z)$ and $g(-Z)$ and average. Variance is
+\[
+\frac12\Var(g(Z))+\frac12\Cov(g(Z),g(-Z))
+\]
+relative to a pair-based convention. Negative covariance reduces error. Antithetics
+are especially effective for monotone payoffs under symmetric shocks.
+
+\section{Control variates}
+
+Let $Y$ have known mean $\mu_Y$. Use
+\[
+\widehat V_c=\overline X-c(\overline Y-\mu_Y).
+\]
+The variance-minimizing coefficient is
+$c^\star=\Cov(X,Y)/\Var(Y)$ and reduction factor is $1-\rho_{XY}^2$.
+Estimate $c$ on an independent pilot or account for its estimation.
+
+For an arithmetic Asian call, a geometric Asian or discounted terminal stock is a
+natural control.
+
+\section{Importance sampling}
+
+If rare loss $A$ is seldom observed under $p$, sample from $q$ and weight:
+\[
+\Prob_p(A)=\E_q\left[
+\ind_A(X)\frac{p(X)}{q(X)}
+\right].
+\]
+The support of $q$ must cover relevant $p$ states. Poor likelihood ratios can have
+infinite variance even when the estimator is unbiased. Exponential tilting chooses
+a proposal that makes the rare event less rare.
+
+\section{Quasi-Monte Carlo}
+
+Low-discrepancy sequences fill the unit cube more uniformly than random points.
+Randomized Sobol sequences allow error estimation. Effective dimension matters:
+Brownian bridge or principal-component construction assigns early coordinates to
+important variation.
+
+Classical $N^{-1}$-like convergence requires smoothness and dimension conditions;
+discontinuous barriers and exercise rules reduce gains. Scrambling and replicate
+randomizations provide honest empirical errors.
+
+\section{Nested simulation}
+
+CVA, capital, and risk of future value may require outer market scenarios and inner
+conditional valuations. Cost grows multiplicatively. Regression proxies, least-squares
+Monte Carlo, multilevel Monte Carlo, and allocation of inner paths reduce cost.
+Proxy validation must focus on tails and boundary states, not only average error.
+
+\section{Problems}
+
+\begin{exercise}[Core: control variate]
+Derive $c^\star$ and the variance-reduction factor.
+\end{exercise}
+\begin{exercise}[Core: discretization study]
+Design a grid refinement study that separately estimates Monte Carlo error and weak
+time-step bias.
+\end{exercise}
+\begin{exercise}[Advanced: importance sampling]
+For a Gaussian tail probability, derive exponential mean shifting and the likelihood
+ratio. Explore variance as the shift changes.
+\end{exercise}
+
+
+\chapter{Finite Differences, Trees, and Transform Methods}
+
+\begin{objectives}
+Discretize pricing PDEs, analyze stability and convergence, use Fourier methods, and
+choose an algorithm that respects payoff and model structure.
+\end{objectives}
+
+\section{Finite-difference grids}
+
+For Black--Scholes PDE, transform or discretize time $t_n$ and price $S_j$. Central
+spatial differences approximate
+\[
+V_S\approx\frac{V_{j+1}-V_{j-1}}{2\Delta S},\qquad
+V_{SS}\approx\frac{V_{j+1}-2V_j+V_{j-1}}{\Delta S^2}.
+\]
+Explicit time stepping computes the next layer directly but has a stability
+restriction. Implicit stepping solves a tridiagonal system and is unconditionally
+stable in a norm sense. Crank--Nicolson averages explicit and implicit operators,
+giving second-order time accuracy for smooth solutions.
+
+Nonsmooth terminal payoffs can make Crank--Nicolson oscillate. Rannacher smoothing
+uses initial implicit half steps. Grid boundaries should follow asymptotic payoff
+behavior and be stress-tested.
+
+\section{Consistency, stability, convergence}
+
+\begin{theorem}[Lax equivalence, informal]
+For a well-posed linear initial-value problem and a consistent finite-difference
+scheme, stability is equivalent to convergence.
+\end{theorem}
+
+Consistency means local truncation error vanishes. Stability controls amplification
+of perturbations. Convergence means numerical solution approaches the true solution.
+Checking only a visually smooth surface proves none of them.
+
+\section{American complementarity}
+
+An American option solves a linear complementarity problem:
+\[
+\max\{h-V,\ V_t+\mathcal LV-rV\}=0
+\]
+under a sign convention. Projected SOR, penalty methods, and policy iteration enforce
+the obstacle. Verify value exceeds intrinsic, exercise boundary behaves sensibly,
+and European limits are recovered.
+
+\section{Lattices}
+
+Binomial and trinomial lattices discretize state transitions while preserving
+recombination. Trinomial trees can match drift and variance with greater flexibility.
+For multiple factors, tree size grows quickly and correlation matching can create
+negative transition probabilities.
+
+Trees naturally handle early exercise and discrete dividends. They converge
+nonmonotonically for some strikes; Richardson extrapolation and smoothing help.
+
+\section{Fourier pricing}
+
+If a model has known characteristic function of log price, option values can be
+computed by Fourier inversion. Damping makes a call transform integrable. The
+Carr--Madan style transform applies FFT across a strike grid:
+\[
+C(k)=\frac{\e^{-\alpha k}}{\pi}
+\int_0^\infty
+\operatorname{Re}\left[
+\e^{-iuk}\Psi(u;\alpha)
+\right]\dd u.
+\]
+
+FFT is fast for many evenly spaced log strikes but couples strike spacing and
+frequency cutoff. Aliasing, truncation, damping, and interpolation must be checked.
+Direct quadrature can be preferable for a few options.
+
+\section{Numerical quadrature}
+
+Trapezoidal and Simpson rules approximate regular finite integrals. Gaussian
+quadrature chooses nodes and weights exact for polynomial families under a weight.
+Adaptive quadrature allocates evaluations where estimated error is high.
+
+Singular integrands, oscillation, and infinite domains require transformations or
+specialized schemes. Report absolute error against a closed form when one exists.
+
+\section{Algorithm selection}
+
+\begin{longtable}{p{0.22\textwidth}p{0.31\textwidth}p{0.37\textwidth}}
+\toprule
+Method & Strength & Main limitation\\
+\midrule
+Closed form & speed, transparency, Greeks & narrow assumptions\\
+Tree & early exercise, discrete events & dimension and convergence\\
+Finite difference & PDEs, free boundaries & state dimension, grids\\
+Monte Carlo & high dimension, paths & early exercise, noisy Greeks\\
+Fourier & many strikes, affine models & transform and grid errors\\
+Quadrature & low-dimensional accuracy & dimension and singularities\\
+\bottomrule
+\end{longtable}
+
+A production library prices benchmarks by two independent methods. Agreement within
+tolerance is a control, not redundant work.
+
+\section{Problems}
+
+\begin{exercise}[Core: explicit stability]
+Derive coefficients of an explicit Black--Scholes scheme and a sufficient condition
+for nonnegative weights.
+\end{exercise}
+\begin{exercise}[Core: boundary]
+Specify lower and upper boundaries for European calls and puts with dividends.
+\end{exercise}
+\begin{exercise}[Advanced: FFT]
+Derive the damped call transform and analyze how log-strike spacing relates to the
+frequency grid.
+\end{exercise}
+
+
+\chapter{Statistical Computing and Reproducible Software}
+
+\begin{objectives}
+Design auditable quantitative software, test mathematical properties, preserve data
+lineage, and make research reproducible across machines and time.
+\end{objectives}
+
+\section{Architecture}
+
+Separate:
+
+\begin{itemize}
+\item immutable source-data ingestion;
+\item validation and canonical schemas;
+\item pure mathematical functions;
+\item stateful simulation or backtest engines;
+\item experiment configuration;
+\item reports and generated artifacts.
+\end{itemize}
+
+Pure functions are easy to test. Domain objects should carry units, currency,
+calendar, and convention rather than relying on hidden globals. A pricing function
+should not silently download data.
+
+\section{Testing layers}
+
+Unit tests cover small functions and edge cases. Property tests verify invariants:
+call price increases with spot, discount factors are positive, a covariance estimate
+is positive semidefinite, and portfolio weights reconcile. Regression tests freeze
+trusted examples. Integration tests exercise complete data-to-report flows.
+
+Numerical tests use tolerances tied to a benchmark and grid. Tests should include
+zero time, zero volatility limits, deep moneyness, negative rates when supported,
+missing dates, and invalid inputs.
+
+\section{Data contracts}
+
+A canonical dataset records:
+
+\begin{itemize}
+\item provider and exact endpoint;
+\item instrument identifier and mapping history;
+\item event, publication, and ingestion timestamps with timezone;
+\item units, currency, frequency, adjustment, and missing-value codes;
+\item download time, query, checksum, and license note;
+\item transformations from raw to analytical columns.
+\end{itemize}
+
+Never overwrite raw files. A transformation manifest makes derived data reproducible.
+CSV is portable but loses types; Parquet preserves schemas and is efficient. Database
+constraints can enforce uniqueness and temporal validity.
+
+\section{Environments and randomness}
+
+Pin direct and transitive dependencies for a released result. Record interpreter,
+operating system, BLAS, and compiler where numerical differences matter. Containers
+improve portability but do not guarantee permanent access to external data.
+
+A random seed initializes a generator. Parallel simulations need independent
+substreams, not repeated identical seeds. Store seed and generator family in
+experiment metadata.
+
+\section{Logging and experiment manifests}
+
+An experiment manifest includes configuration, Git commit, input checksums, start
+time, code version, environment, and output checksums. Logs should report decisions
+and anomalies without leaking credentials or licensed data.
+
+Generated tables should come directly from saved results. Manual transcription
+breaks lineage. LaTeX can input CSV-derived tables or generated fragments, but the
+generation step must be deterministic and documented.
+
+\section{Code review for quantitative models}
+
+Review mathematical specification separately from software behavior. Ask:
+
+\begin{enumerate}
+\item Do equations, conventions, and units match the design?
+\item Are array shapes, labels, and time axes explicit?
+\item Are invalid domains rejected rather than silently coerced?
+\item Are calibration residuals and solver status checked?
+\item Are data and model timestamps point-in-time?
+\item Are independent benchmarks and sensitivities present?
+\item Are performance optimizations behavior-preserving?
+\end{enumerate}
+
+\section{Problems}
+
+\begin{exercise}[Core: property tests]
+Specify property-based tests for Black--Scholes call price, historical Expected
+Shortfall, and a covariance shrinkage estimator.
+\end{exercise}
+\begin{exercise}[Core: manifest]
+Design a JSON experiment manifest for a yield-curve study with raw-source checksums
+and point-in-time settings.
+\end{exercise}
+\begin{exercise}[Advanced: reproducibility]
+Explain why an unpinned vendor endpoint can make a computationally deterministic
+script scientifically irreproducible.
+\end{exercise}
+
+
+\chapter{Modern Machine Learning for Quantitative Finance}
+
+\begin{objectives}
+Formulate machine learning as statistical decision theory, understand kernels and
+neural networks, build probabilistically calibrated sequence models, use
+reinforcement learning cautiously, and evaluate adaptive systems under financial
+nonstationarity.
+\end{objectives}
+
+\section{Learning as risk minimization}
+
+Let $Z=(X,Y)\sim P$ and prediction rule $f$ lie in class $\mathcal F$. Population
+risk is
+\[
+\mathcal R(f)=\E_P[\ell(Y,f(X))].
+\]
+Empirical risk minimization chooses
+\[
+\widehat f\in\argmin_{f\in\mathcal F}
+\left\{\frac1n\sum_{i=1}^n\ell(Y_i,f(X_i))
++\lambda\mathcal J(f)\right\}.
+\]
+The loss defines the statistical target. Squared loss targets conditional mean;
+absolute loss targets median; pinball loss targets a conditional quantile; log loss
+targets a conditional distribution. A trading objective may instead depend on
+cost-aware utility, but directly optimizing a noisy backtest makes selection bias
+especially severe.
+
+Expected generalization error decomposes conceptually into irreducible noise,
+approximation error, estimation error, and distribution shift. Increasing model
+capacity can reduce approximation error and increase estimation error. Regularization,
+data scale, and stable inductive structure govern the balance.
+
+\section{Features and invariances}
+
+Prices in currency units are usually nonstationary and arbitrary under stock splits.
+Returns, spreads, ratios, ranks, and curve coordinates often encode more stable
+objects, but no transformation guarantees stationarity. A feature definition must
+include lookback window, missingness rule, publication lag, cross-sectional universe,
+and training-only normalization.
+
+Useful inductive biases include:
+
+\begin{itemize}
+\item permutation invariance across an unordered asset set;
+\item translation invariance across time in local convolutions;
+\item monotonicity where economic dominance requires it;
+\item no-arbitrage constraints on price surfaces;
+\item equivariance to currency or notional scaling;
+\item sparsity or low rank for high-dimensional panels.
+\end{itemize}
+
+Encoding a known invariance reduces sample burden and prevents economically
+impossible extrapolation.
+
+\section{Kernel methods}
+
+A positive definite kernel $k(x,x')$ represents an inner product
+$\langle\phi(x),\phi(x')\rangle$ in a possibly infinite-dimensional feature space.
+Kernel ridge regression solves
+\[
+\min_{f\in\mathcal H_k}
+\sum_{i=1}^n(y_i-f(x_i))^2+\lambda\norm{f}_{\mathcal H_k}^2.
+\]
+
+\begin{theorem}[Representer theorem]
+For a broad class of losses depending on training evaluations and a strictly
+increasing penalty in RKHS norm, a minimizer has form
+\[
+\widehat f(x)=\sum_{i=1}^n\alpha_i k(x_i,x).
+\]
+\end{theorem}
+\begin{proof}[Proof idea]
+Decompose any $f$ into a component in the span of
+$\{k(x_i,\cdot)\}_{i=1}^n$ and an orthogonal component. The latter is zero at every
+training point by the reproducing property, so it cannot improve fit and can only
+increase the norm penalty.
+\end{proof}
+
+For squared loss,
+$\widehat\alpha=(K+\lambda I)^{-1}y$. Kernel methods are strong for structured
+small-to-medium data but scale cubically without approximation. Kernel and
+hyperparameter selection must occur within time-respecting validation.
+
+\section{Neural networks}
+
+A feed-forward network composes affine maps and nonlinear activations:
+\[
+h^{(0)}=x,\qquad
+h^{(\ell)}=\sigma(W_\ell h^{(\ell-1)}+b_\ell),\qquad
+\widehat y=W_Lh^{(L-1)}+b_L.
+\]
+Backpropagation applies reverse-mode automatic differentiation to compute the
+gradient of loss with respect to every parameter. Stochastic gradient methods update
+using minibatches; momentum and adaptive scaling change optimization dynamics.
+
+Universal approximation results state that sufficiently wide networks can
+approximate broad classes of continuous functions on compact sets. They do not say
+finite financial samples identify the correct function, that gradient descent finds
+it, or that it extrapolates across regimes.
+
+Weight decay, dropout, early stopping, augmentation, and architectural constraints
+regularize differently. Batch normalization can leak cross-sectional or temporal
+information if a batch mixes future observations; inference statistics and panel
+construction require explicit design.
+
+\section{Sequence models}
+
+A recurrent state model updates
+$h_t=g_\theta(h_{t-1},x_t)$ and emits a forecast. Gated recurrent units address
+vanishing gradients. Temporal convolutions process fixed receptive fields in
+parallel.
+
+Self-attention maps queries, keys, and values:
+\[
+\operatorname{Attention}(Q,K,V)=
+\operatorname{softmax}\left(\frac{QK^\transpose}{\sqrt d}\right)V.
+\]
+Causal masks prevent a position from attending to future tokens. Positional or time
+encodings distinguish order and irregular spacing.
+
+Financial panels add complications: changing universes, mixed frequencies, release
+lags, missing-not-at-random data, and corporate events. A transformer with a causal
+mask can still leak if input features were standardized globally or fundamentals
+were aligned to fiscal period rather than publication.
+
+\section{Cross-sectional learning}
+
+At each date, a model can rank assets by a score $s_{i,t}$. Cross-sectional losses
+include pairwise ranking and listwise objectives. Portfolio construction converts
+scores into weights under neutrality, risk, turnover, and capacity:
+\[
+w_t=\argmax_w
+\left\{
+s_t^\transpose w-\frac{\gamma}{2}w^\transpose\widehat\Sigma_tw
+-C(w-w_{t-1})
+\right\}.
+\]
+This separation permits evaluation of forecast quality and portfolio translation.
+End-to-end optimization can be useful, but it entwines model learning with an
+estimated risk and cost layer.
+
+Panel validation blocks by time, not individual rows. Otherwise the model sees the
+same market shock in training assets and validation assets. A geography or asset-class
+holdout tests cross-sectional transport but does not replace a future-time test.
+
+\section{Probabilistic forecasts and calibration}
+
+A probabilistic model should be sharp and calibrated. For event probability
+$p_t$, calibration means
+$\Prob(Y_t=1\mid p_t=p)=p$ in an ideal population sense. Reliability diagrams and
+Brier decomposition diagnose calibration; log loss heavily penalizes confident
+errors.
+
+Quantile forecasts should attain coverage and respond to state. A collection of
+independently estimated quantiles can cross; monotone parameterizations or
+rearrangement fix ordering. Distributional networks can output location, scale,
+mixture weights, or a normalizing flow.
+
+Conformal prediction constructs finite-sample marginal coverage under exchangeability.
+Time dependence and distribution shift break the basic guarantee; weighted,
+blockwise, or online variants add assumptions rather than magically restoring it.
+
+\section{Uncertainty}
+
+Aleatoric uncertainty describes outcome randomness conditional on inputs. Epistemic
+uncertainty describes limited knowledge of the predictive rule. Ensembles, Bayesian
+neural approximations, bootstrap, and last-layer methods estimate parts of epistemic
+uncertainty, but common model misspecification can make every ensemble member agree
+and be wrong.
+
+For a portfolio decision, propagate predictive scenarios through constraints and
+costs. Confidence in a score is not the same as confidence in net P\&L because
+covariance, impact, and crowding are additional uncertain layers.
+
+\section{Online learning and drift}
+
+Online learning receives data sequentially, predicts, observes loss, and updates.
+Regret relative to comparator $f$ is
+\[
+\operatorname{Regret}_T(f)=
+\sum_{t=1}^T\ell_t(f_t)-\sum_{t=1}^T\ell_t(f).
+\]
+Sublinear regret means average loss approaches the best fixed comparator in hindsight
+under the theorem's assumptions. Markets may change so a dynamic comparator or
+variation budget is more relevant.
+
+Drift monitoring includes feature distributions, residuals, calibration, turnover,
+and economic exposures. A detected change triggers a predeclared action: investigate,
+reduce risk, retrain, or retire. Repeatedly changing the system after losses without
+an audit creates an adaptive overfit.
+
+\section{Reinforcement learning}
+
+A Markov decision process has state $s_t$, action $a_t$, transition law, reward
+$r_t$, and discount $\gamma$. For policy $\pi$,
+\[
+V^\pi(s)=
+\E^\pi\left[
+\sum_{k=0}^{\infty}\gamma^kr_{t+k}\mid s_t=s
+\right].
+\]
+The Bellman optimality equation is
+\[
+V^\star(s)=
+\max_a\E[r(s,a,S')+\gamma V^\star(S')\mid s,a].
+\]
+
+In trading, the true state is partially observed, actions affect costs and perhaps
+prices, rewards have long horizons, and historical data were generated by another
+policy. Offline RL cannot freely test counterfactual actions absent support.
+Importance sampling can have explosive variance; model-based simulation inherits
+simulator error.
+
+A safe design begins with a transparent stochastic-control benchmark, hard risk
+constraints, conservative off-policy evaluation, and stress outside the training
+distribution. Reward must include costs, financing, inventory, and risk; a raw P\&L
+reward invites leverage.
+
+\section{Generative models and synthetic scenarios}
+
+Variational autoencoders, adversarial networks, diffusion models, and autoregressive
+models can generate return paths or order-book states. Fidelity should be evaluated
+on marginal tails, serial dependence, cross-asset dependence, conditional dynamics,
+and decision-relevant stress.
+
+Synthetic data are useful for privacy, augmentation, and controlled experiments.
+They are not observed evidence and cannot validate the assumptions used to generate
+them. Rare crises are precisely where flexible generators have least information.
+
+\section{Evaluation protocol}
+
+A modern ML study should report:
+
+\begin{enumerate}
+\item a simple linear and economic benchmark;
+\item model capacity, all tuned ranges, and number of research trials;
+\item time and cross-sectional split with purge and embargo if needed;
+\item training curves and seed variability;
+\item proper statistical loss and calibration;
+\item net decision performance with costs and constraints;
+\item factor, regime, and subgroup attribution;
+\item perturbation, missingness, delay, and cost stress;
+\item inference-time latency, stability, and monitoring plan.
+\end{enumerate}
+
+Complexity is justified by stable incremental evidence, not by the sophistication of
+the architecture.
+
+\section{Problems}
+
+\begin{exercise}[Core: representer theorem]
+Complete the orthogonal-decomposition proof of the representer theorem and derive
+kernel-ridge coefficients.
+\end{exercise}
+\begin{exercise}[Core: attention leakage]
+List every way a causally masked sequence model can still use future financial
+information through preprocessing, data alignment, and universe construction.
+\end{exercise}
+\begin{exercise}[Advanced: probabilistic portfolio]
+Design a model that forecasts a joint return distribution and a policy that optimizes
+Expected Shortfall subject to turnover. Specify a proper forecast score and a
+separate decision score.
+\end{exercise}
+\begin{exercise}[Advanced: offline control]
+Formulate inventory liquidation as an MDP. State what historical-policy support is
+needed for off-policy evaluation and how a model error could create a fictitious
+profitable action.
+\end{exercise}
+\begin{exercise}[Research]
+Compare ridge, gradient-boosted trees, and a small causal transformer on one
+predeclared target. Use identical point-in-time features, nested walk-forward tuning,
+multiple seeds, cost-aware portfolio mapping, and a locked final period.
+\end{exercise}

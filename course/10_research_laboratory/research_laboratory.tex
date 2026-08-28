@@ -1,0 +1,407 @@
+\chapter{Research Design and Data Provenance}\label{ch:researchdesign}
+
+\begin{objectives}
+Turn an economic idea into a falsifiable, reproducible quantitative study; choose
+authoritative data; and preserve point-in-time lineage from source to conclusion.
+\end{objectives}
+
+\section{The research question}
+
+A useful question names a population, horizon, information set, target, and loss.
+For example: \emph{Does an expanding-window term-structure model improve the
+one-month log score of recession probabilities relative to a constant-probability
+benchmark, using only releases available at each month end?} This is testable.
+\emph{Can AI predict markets?} is not yet a research design.
+
+Before coding, write:
+
+\begin{itemize}
+\item economic mechanism and competing explanation;
+\item estimand or forecast target;
+\item observation and decision unit;
+\item sample, universe, and inclusion rules;
+\item information-availability and execution timeline;
+\item benchmark and loss;
+\item planned robustness and failure criteria.
+\end{itemize}
+
+\section{A hierarchy of evidence}
+
+Descriptive evidence summarizes a defined sample. Predictive evidence demonstrates
+performance on genuinely new observations. Causal evidence requires an intervention
+or identification strategy. Structural evidence estimates an economic model under
+maintained restrictions. A backtest is not automatically any one of these; its claim
+must be named.
+
+Theory disciplines which variables and signs matter. Exploratory visualization finds
+errors and hypotheses. A validation set selects models. A locked test estimates
+generalization once. Reusing the test turns it into training data.
+
+\section{Primary and secondary data}
+
+Prefer a primary producer for definitions and release metadata:
+
+\begin{longtable}{p{0.19\textwidth}p{0.30\textwidth}p{0.41\textwidth}}
+\toprule
+Domain & Source & Research use and caution\\
+\midrule
+U.S. macro & FRED and ALFRED, \url{https://fred.stlouisfed.org/docs/api/fred/} &
+API access to observations and vintages; inspect underlying agency, units, seasonal
+adjustment, revisions, and release time.\\
+U.S. yields & U.S. Treasury, \url{https://home.treasury.gov/resource-center/data-chart-center/interest-rates} &
+Official daily par curves and methodology; par yields are interpolated curve values,
+not transaction yields or zero rates.\\
+Monetary policy & Federal Reserve and New York Fed,
+\url{https://www.newyorkfed.org/markets} &
+Rates, operations, reference rates, and SOMA material; align business dates and
+publication timestamps.\\
+U.S. filings & SEC EDGAR APIs, \url{https://www.sec.gov/search-filings/edgar-application-programming-interfaces} &
+Company facts and filings; comply with fair-access policy, map identifiers, preserve
+filing and acceptance times, and handle amendments.\\
+Factors & Kenneth French Data Library,
+\url{https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html} &
+Research factor benchmarks with construction notes; methodology can change and
+published portfolios are not a substitute for point-in-time reconstruction.\\
+Options & Cboe market statistics,
+\url{https://www.cboe.com/data/market_statistics/} &
+Official exchange statistics and selected downloads; detailed historical quotes and
+trades may require licensed products.\\
+Europe & ECB Data Portal, \url{https://data.ecb.europa.eu/} &
+Monetary, financial, yield, and macro series with structured metadata; inspect
+frequency, seasonal adjustment, and area composition.\\
+Global & BIS Data Portal, \url{https://data.bis.org/} &
+Credit, banking, liquidity, debt, FX, and property series; cross-country definitions
+and breaks require care.\\
+\bottomrule
+\end{longtable}
+
+Convenience services are useful for prototypes but may change schemas, adjustments,
+symbols, and terms. The repository's market-price pipeline uses Yahoo Finance through
+\texttt{yfinance} as a convenient adjusted-price feed and labels it as such. Claims
+requiring production-quality price history should be repeated with licensed,
+point-in-time data.
+
+\section{Data due diligence}
+
+For every field, answer:
+
+\begin{enumerate}
+\item Who creates the underlying observation?
+\item What exactly is measured and in what units?
+\item Is it a level, rate, index, yield, return, or annualized transformation?
+\item When did the event occur, when was it published, and when was it revised?
+\item What do missing and preliminary values mean?
+\item Did methodology, coverage, identifier, or calendar change?
+\item May the data be stored and redistributed?
+\end{enumerate}
+
+Automated checks include uniqueness, monotonic timestamps, valid domains, missingness,
+outliers, cross-field identities, and checksums. A large move is quarantined for
+review, not automatically deleted.
+
+\section{Revisions and vintages}
+
+Macro observations often evolve from advance to revised estimates. Let
+$x_{t|v}$ be the estimate for economic period $t$ as recorded at vintage $v$.
+Forecasts made at $v$ may use only $x_{t|v}$ for releases available then. A
+revision study can treat
+$x_{t|v_{\mathrm{final}}}-x_{t|v_{\mathrm{initial}}}$ as an outcome and examine
+whether revisions are news or noise.
+
+Cross-sectional fundamentals also have point-in-time versions. Filing date, vendor
+processing, and restatement history determine availability. Lagging every field by
+an arbitrary fixed number of months is a crude defense, not full lineage.
+
+\section{Reproducible outputs}
+
+Each project should emit:
+
+\begin{itemize}
+\item a machine-readable configuration;
+\item raw or cached data with allowed provenance;
+\item validation report;
+\item tidy analytical data;
+\item model estimates and predictions;
+\item tables and figures generated from saved results;
+\item an interpretation and model-risk memo;
+\item a command that rebuilds everything.
+\end{itemize}
+
+\section{Problems}
+
+\begin{exercise}[Core: provenance]
+Choose one FRED series and write a complete data contract including underlying
+producer, units, frequency, seasonal adjustment, vintage, missing codes, and release
+availability.
+\end{exercise}
+\begin{exercise}[Core: test protocol]
+Pre-register a market forecast including all choices that could otherwise be tuned
+after observing test returns.
+\end{exercise}
+\begin{exercise}[Advanced: revision triangle]
+Design a database table for real-time macro vintages and a query that reconstructs
+the information set at any historical date.
+\end{exercise}
+
+
+\chapter{Empirical Laboratories}
+
+\begin{objectives}
+Integrate the theory in end-to-end projects spanning regime risk, the yield curve,
+factors, options, and causal event studies.
+\end{objectives}
+
+\section{Laboratory I: cross-asset regime risk}
+
+\subsection*{Question}
+How do equity, duration, gold, and volatility exposures behave across latent or
+observable volatility regimes, and does volatility targeting improve the full
+distribution after costs?
+
+\subsection*{Mathematics}
+Let return vector $r_t$ have conditional model
+\[
+r_t\mid S_t=k\sim t_{\nu_k}(\mu_k,\Sigma_k),\qquad
+\Prob(S_t=j\mid S_{t-1}=i)=p_{ij}.
+\]
+Estimate filtered regime probabilities, not smoothed probabilities, for decisions.
+Compare with a transparent observable regime based on lagged market volatility.
+
+Portfolio exposure is
+\[
+w_t=\min\left(w_{\max},
+\frac{\sigma^\star}{\widehat\sigma_{t|t-1}}\right)w_0.
+\]
+Test whether scaling changes volatility, Expected Shortfall, drawdown, turnover, and
+factor exposure. A lower drawdown is not evidence of alpha if average exposure fell.
+
+\subsection*{Protocol}
+Use adjusted total-return proxies with explicitly documented limitations. Split by
+time. Fit all regime thresholds and covariance models in the expanding training
+sample. Charge spread and nonlinear stress costs. Bootstrap blocks of strategy
+returns and repeat under alternative start dates.
+
+\subsection*{Failure modes}
+Smoothed-state leakage, VIX treated as an investable total-return asset, constant
+transaction costs in crises, and synthetic fallback data presented as empirical
+evidence are prohibited. The repository labels fallback output in provenance.
+
+\section{Laboratory II: Treasury curve factors and forecasting}
+
+\subsection*{Question}
+How much yield-curve variation is described by level, slope, and curvature, and do
+Nelson--Siegel dynamics forecast yields or bond excess returns out of sample?
+
+\subsection*{Mathematics}
+At each date, fit
+\[
+y_t(\tau)=\beta_t^\transpose\ell(\tau;\lambda)+\varepsilon_t(\tau)
+\]
+by weighted least squares. Compare the fitted factors with PCA. Model factors by
+VAR(1), random walk, and shrinkage VAR. Map forecast yields into zero-coupon price
+changes and duration-scaled returns using an explicit par-to-zero approximation or a
+proper bootstrap.
+
+\subsection*{Protocol}
+Use official Treasury daily par yields or documented FRED constant-maturity series.
+Do not call them zero rates. Freeze $\lambda$ in training or tune it within nested
+validation. Forecast recursively. Evaluate yield RMSE by maturity, directional
+accuracy, and a bond-pricing loss. Account for the Treasury methodology break in
+December 2021.
+
+\subsection*{Extensions}
+Estimate a state-space dynamic Nelson--Siegel model; include macro factors; decompose
+forecast errors by level, slope, and curvature; test whether accuracy survives
+post-2020 and methodology-change subsamples.
+
+\section{Laboratory III: factor replication and robust allocation}
+
+\subsection*{Question}
+Can public research factors explain cross-asset portfolio returns, and does
+factor-aware covariance shrinkage improve an implementable allocation?
+
+\subsection*{Mathematics}
+Estimate
+\[
+r_t-r_{f,t}\ones=\alpha+Bf_t+\varepsilon_t
+\]
+with HAC inference. Construct
+$\widehat\Sigma=B\widehat\Sigma_fB^\transpose+\widehat D$, shrink it toward a
+diagonal or constant-correlation target, and solve constrained minimum variance.
+
+\subsection*{Protocol}
+Download factor returns with their current construction notes and archive the file
+checksum. Align monthly periods, percentages, and risk-free convention. Use only
+past data for factor selection and covariance. Compare equal weight, sample
+covariance, factor covariance, and shrinkage after turnover.
+
+\subsection*{Interpretation}
+A factor alpha is not skill unless benchmark choice was predeclared and holdings are
+implementable. Factor exposure can change across regimes. Report active risk and
+drawdown alongside Sharpe.
+
+\section{Laboratory IV: arbitrage-aware option surface}
+
+\subsection*{Question}
+Can a cleaned option chain produce a smooth risk-neutral density and stable local
+volatility without static arbitrage?
+
+\subsection*{Mathematics}
+Infer forwards from put--call parity, filter quotes with executable bounds, and fit
+call prices subject to decreasing and convex strike constraints. Recover
+\[
+f^\Q_T(K)=P(0,T)^{-1}\partial_{KK}C(K,T).
+\]
+Compare spline, parametric total-variance, and constrained quadratic fits.
+
+\subsection*{Protocol}
+Use synchronized bid and ask, not last prices. Record underlying, rates, dividends,
+exercise style, multiplier, and timestamps. Fit mid prices while penalizing errors
+outside bid--ask. Withhold strikes and maturities. Stress numerical derivatives.
+
+\subsection*{Extensions}
+Calibrate Heston; compare price residuals with hedge residuals; study the risk-neutral
+tail over time; never interpret it as a physical crash probability without an
+explicit risk-premium model.
+
+\section{Laboratory V: causal policy event study}
+
+\subsection*{Question}
+What is the response of rates, equities, FX, and credit to an identified monetary
+policy surprise rather than to the endogenous policy decision?
+
+\subsection*{Design}
+Use a narrow window around scheduled announcements and a surprise measured from an
+appropriate high-frequency futures instrument. Separate target-rate and path
+components by principal components of the futures curve. Regress intraday asset
+changes on surprises, then use local projections for lower-frequency responses.
+
+\subsection*{Threats}
+Central-bank information effects, overlapping news, time-zone mismatch, contract
+roll, anticipated announcements, heteroskedasticity, and small event count all
+matter. Report event-level scatterplots and leave-one-event-out sensitivity.
+
+\section{Problems}
+
+\begin{exercise}[Core: project map]
+For each laboratory, list the theorem, estimator, numerical method, validation
+design, and decision metric it uses.
+\end{exercise}
+\begin{exercise}[Advanced: independent replication]
+Choose one laboratory and specify an independent data source or market that would
+provide the strongest falsification test.
+\end{exercise}
+
+
+\chapter{From Student Project to Research Portfolio}
+
+\begin{objectives}
+Communicate advanced quantitative work with clarity, build a coherent portfolio of
+evidence, and identify a path from foundations to independent research.
+\end{objectives}
+
+\section{What a strong repository demonstrates}
+
+A serious financial-engineering portfolio demonstrates:
+
+\begin{itemize}
+\item mathematical fluency through derivations and proofs;
+\item statistical discipline through identification and uncertainty;
+\item market knowledge through conventions and execution;
+\item software quality through tests and reproducibility;
+\item judgment through limitations and negative results;
+\item communication through readable reports and figures.
+\end{itemize}
+
+A large number of shallow notebooks is weaker than a small number of complete
+research pipelines. Each flagship project should connect a theory chapter to a data
+contract, code, tests, generated results, and a model-risk memo.
+
+\section{Suggested sequence}
+
+\begin{enumerate}
+\item \textbf{Foundation.} Implement returns, discounting, Black--Scholes, bond
+analytics, optimization, and statistical tests with unit and property tests.
+\item \textbf{Replication.} Reproduce a textbook result and one published empirical
+result, including differences.
+\item \textbf{Extension.} Change an assumption, data source, market, or validation
+period for a falsification test.
+\item \textbf{Synthesis.} Combine forecasting, portfolio construction, costs, and
+risk in an end-to-end decision.
+\item \textbf{Original question.} Pre-register a mechanism and test it on
+point-in-time data.
+\end{enumerate}
+
+\section{Writing a research report}
+
+The report structure is:
+
+\begin{enumerate}
+\item abstract with question, method, result, and limitation;
+\item economic motivation and falsifiable hypotheses;
+\item data provenance and sample construction;
+\item mathematical model and identification assumptions;
+\item estimator and numerical implementation;
+\item predeclared validation and benchmarks;
+\item results with uncertainty and economic magnitude;
+\item robustness, stress, and negative findings;
+\item limitations and next experiment;
+\item reproducibility appendix.
+\end{enumerate}
+
+Put derivations where a reader can audit them. Put large robustness tables in an
+appendix. A figure title states the finding; axes state units; caption states sample
+and construction.
+
+\section{Reading research}
+
+For every paper, identify:
+
+\begin{itemize}
+\item the claim and counterfactual;
+\item the economic mechanism;
+\item the key equation and its assumptions;
+\item data availability and selection;
+\item variation that identifies the parameter;
+\item uncertainty and multiple testing;
+\item whether implementation resembles a tradable decision;
+\item the strongest alternative explanation.
+\end{itemize}
+
+Reproduce a central table before extending the paper. Disagreement is useful when it
+can be localized to data, timing, estimator, or assumption.
+
+\section{Ethics and epistemic standards}
+
+Do not present synthetic data as observed evidence, revised macro history as a
+real-time forecast, midquote returns as executable fills, or a selected backtest as
+an untouched test. Do not distribute data beyond its license. Protect credentials
+and confidential records.
+
+State uncertainty in language. A model estimate is conditional; a p-value is not
+truth; a scenario is not a probability forecast; a risk-neutral density is not a
+physical belief. Intellectual honesty is a technical skill.
+
+\section{Mastery checklist}
+
+The reader is ready for independent work when they can:
+
+\begin{itemize}
+\item prove core pricing and probability results and state hypotheses;
+\item derive an estimator and its limiting uncertainty;
+\item implement two independent numerical methods for a benchmark;
+\item construct point-in-time datasets and audit timestamps;
+\item design a walk-forward or causal validation;
+\item decompose portfolio risk and trading costs;
+\item explain where a model will fail before seeing the result;
+\item write a reproducible report that another researcher can challenge.
+\end{itemize}
+
+\section{Capstone}
+
+\begin{exercise}[Capstone research dossier]
+Complete one flagship laboratory. Deliver a preregistration, data dictionary,
+mathematical appendix, tested code, immutable predictions, cost-aware evaluation,
+stress results, model card, and ten-page research paper. Include at least one
+deliberate falsification test and one negative finding.
+\end{exercise}

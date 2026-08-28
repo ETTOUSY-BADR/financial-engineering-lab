@@ -1,16 +1,414 @@
-\chapter{Financial markets and engineering practice}
-\section{Market instruments}
-Equities are claims on residual cash flows; bonds promise contractual cash flows; forwards and futures transfer exposure to a future price; options create nonlinear payoffs. A payoff diagram is often the fastest way to expose hidden leverage and tail risk.
-\section{Risk measures}
-For loss $L$, Value at Risk at level $\alpha$ is $\operatorname{VaR}_\alpha(L)=\inf\{\ell:\Prob(L\leq\ell)\geq\alpha\}$. Expected Shortfall is $\operatorname{ES}_\alpha(L)=\E[L\mid L\geq\operatorname{VaR}_\alpha(L)]$ when the conditional expectation is well-defined. Historical, parametric, and Monte Carlo estimates answer different questions.
-\begin{proposition}[Subadditivity of Expected Shortfall]
-Under standard integrability conditions, $\operatorname{ES}_\alpha(X+Y)\leq\operatorname{ES}_\alpha(X)+\operatorname{ES}_\alpha(Y)$. This makes Expected Shortfall a coherent risk measure alongside monotonicity, positive homogeneity, and translation invariance.
+\chapter{Securities, Trading, and Market Conventions}
+
+\begin{objectives}
+Understand the contractual cash flows of major instruments, translate market quotes
+into economic exposures, and recognize how settlement, collateral, and conventions
+enter valuation.
+\end{objectives}
+
+\section{The balance-sheet view}
+
+Every security is simultaneously an asset to one party and a liability or residual
+claim of another. A useful first analysis lists:
+
+\begin{itemize}
+\item contractual cash flows and their priority;
+\item states in which cash flows change;
+\item collateral, margin, and close-out rules;
+\item currency, settlement date, day count, and calendar;
+\item liquidity, financing, and counterparty exposure.
+\end{itemize}
+
+Prices are not cash flows. A model maps uncertain future cash flows and discounting
+to a price under explicit assumptions.
+
+\section{Equity}
+
+Common equity is a residual claim after contractual obligations. Corporate actions
+include dividends, splits, repurchases, rights issues, mergers, and spin-offs.
+Raw closing prices across these events do not produce total returns. If $P_t$ is
+ex-dividend price and $D_t$ cash distribution,
+\[
+R_t=\frac{P_t+D_t}{P_{t-1}}-1.
+\]
+Adjusted-price vendors encode corporate actions with methodology that must be
+documented.
+
+Market capitalization weights are proportional to float-adjusted value. Equal
+weighting, fundamental weighting, and price weighting create distinct rebalancing
+and factor exposures. Index membership is governed by rules and changes over time;
+using today's constituents historically creates survivorship bias.
+
+\section{Money-market instruments}
+
+Treasury bills, commercial paper, certificates of deposit, repo, and overnight
+indexed exposures use different quotation bases. A discount yield can be based on
+face value and a 360-day year; an investment yield uses purchase price. Comparing
+numbers without converting conventions creates false arbitrage.
+
+In a repo, one party sells collateral and agrees to repurchase it. The repo rate is
+the financing rate; haircut protects the cash lender from collateral-value changes.
+Special collateral can finance below the general collateral rate because possession
+of a particular security has value.
+
+\section{Bonds}
+
+A fixed-rate bond pays coupons and principal subject to credit and contractual terms.
+Clean price excludes accrued interest; dirty price is the settlement amount:
+\[
+P_{\mathrm{dirty}}=P_{\mathrm{clean}}+\text{accrued interest}.
+\]
+Yield to maturity is the single internal rate equating discounted promised cash
+flows to price. It is not an expected return unless coupons reinvest at that yield,
+the bond is held to maturity, and promised cash flows occur.
+
+Floating-rate notes reset coupons to a reference plus spread. Inflation-linked bonds
+index principal or coupons with publication lags and floors. Callable bonds embed an
+option held by the issuer; putable bonds embed one held by the investor.
+
+\section{Forwards and futures}
+
+A long forward with delivery price $K$ has payoff $S_T-K$. With no income and
+deterministic rate, no arbitrage gives $K=S_0\e^{rT}$. For an asset with known
+continuous yield $q$,
+\[
+F_{0,T}=S_0\e^{(r-q)T}.
+\]
+Storage cost and convenience yield modify commodity carry.
+
+Futures are marked to market daily. When rates are stochastic and correlated with
+the underlying, futures and forward prices can differ because gains and losses are
+realized at different times.
+
+\section{Swaps}
+
+An interest-rate swap exchanges fixed and floating cash flows on a notional. At
+inception, the par fixed rate makes value zero:
+\[
+K_{\mathrm{swap}}=
+\frac{P(0,T_0)-P(0,T_n)}
+{\sum_{i=1}^n\delta_iP(0,T_i)}
+\]
+under a single-curve abstraction. Modern collateralized valuation often projects
+floating cash flows on a tenor curve and discounts on an overnight curve.
+
+Currency swaps exchange principal and interest in different currencies. Total-return
+swaps transfer the price and income performance of an asset against financing.
+Contract details determine funding, collateral, and counterparty risk.
+
+\section{Options}
+
+A European call pays $(S_T-K)^+$ and a put $(K-S_T)^+$. American exercise is
+permitted before maturity; path-dependent options use the history of the underlying.
+At fixed maturity, call value is decreasing and convex in strike under no static
+arbitrage.
+
+\begin{proposition}[Put--call parity]
+For European options with the same $K,T$ on a non-dividend-paying asset,
+\[
+C_0-P_0=S_0-KP(0,T).
+\]
 \end{proposition}
-\section{Portfolio construction}
-Mean-variance optimization is $\max_w w^\top\mu-\frac{\lambda}{2}w^\top\Sigma w$ subject to constraints. Estimation error can dominate the theoretical solution, so shrinkage covariance estimates, robust constraints, and out-of-sample tests are essential. Risk parity targets contributions $RC_i=w_i(\Sigma w)_i/(w^\top\Sigma w)$ rather than raw weights.
-\section{Numerical methods}
-A Monte Carlo estimator for $V=e^{-rT}\E[h(S_T)]$ is $\widehat V=e^{-rT}n^{-1}\sum_{j=1}^nh(S_T^{(j)})$ with standard error $s/\sqrt n$. Antithetic variates, control variates, stratification, and quasi-random sequences reduce variance but do not cure a misspecified model.
-\section{Calibration and model risk}
-Calibration minimizes a weighted discrepancy between observed and model prices, often $\min_\theta\sum_i w_i(P_i^{\mathrm{model}}(\theta)-P_i^{\mathrm{mkt}})^2$. A low calibration error is not validation: examine residual structure, stability across dates, and hedging performance. Greeks such as $\Delta=\partial V/\partial S$ and $\Gamma=\partial^2V/\partial S^2$ quantify local sensitivity, while stress tests explore nonlocal moves.
-\section{Market microstructure}
-Observed prices reflect bid--ask spreads, discrete trading, latency, price impact, and constraints. A backtest must execute at plausible prices and align signal timestamps with the next available trade. A strategy with positive frictionless alpha can have negative net performance after costs.
+\begin{proof}
+Both portfolios---long call plus the present value of $K$, and long put plus the
+asset---pay $\max(S_T,K)$ at $T$. No arbitrage equates their values.
+\end{proof}
+
+With known dividends, replace spot by prepaid forward value. Violations after bid,
+ask, funding, settlement, shorting, and exercise details are needed before claiming
+an executable arbitrage.
+
+\section{Problems}
+
+\begin{exercise}[Core: carry]
+Derive equity-index forward price with discrete known dividends and with a continuous
+dividend yield. State the assumptions.
+\end{exercise}
+\begin{exercise}[Core: swap rate]
+Replicate a floating-rate note to derive the par swap rate formula.
+\end{exercise}
+\begin{exercise}[Advanced: futures convexity]
+Use a two-period tree with stochastic rates to construct a case in which forward and
+futures prices differ.
+\end{exercise}
+
+
+\chapter{Market Microstructure and Execution}
+
+\begin{objectives}
+Model the limit order book, spreads, information, impact, and execution; translate a
+statistical signal into a feasible trading rule with capacity and timestamp
+discipline.
+\end{objectives}
+
+\section{Orders and the limit order book}
+
+A market order demands immediate execution at available quotes. A limit order sets
+a worst acceptable price and supplies liquidity while exposed to non-execution and
+adverse selection. The best bid $b_t$ and ask $a_t$ define quoted midpoint
+$m_t=(a_t+b_t)/2$ and spread $s_t=a_t-b_t$.
+
+The transaction price can be written
+\[
+p_t=m_t+q_t\frac{s_t}{2}+\eta_t,
+\]
+where $q_t=+1$ for buyer initiation and $-1$ for seller initiation, with $\eta_t$
+capturing price improvement and classification error. Alternation between bid and
+ask creates negative first-order autocorrelation even when the efficient price is a
+martingale.
+
+\section{Why spreads exist}
+
+Spread compensates order-processing cost, inventory risk, and adverse selection.
+An informed trader preferentially buys before price rises and sells before it falls,
+so passive quotes lose conditionally to informed flow. Dealers widen or adjust
+quotes as the probability of information increases.
+
+Effective spread for a buy at price $p_t$ relative to pre-trade midpoint $m_t$ is
+$2(p_t-m_t)$. Realized spread compares execution with a later midpoint and attempts
+to subtract information-driven price movement. Price impact is the complementary
+midpoint response.
+
+\section{Order flow and price discovery}
+
+Signed order flow can predict short-horizon price changes because trades reveal
+information and mechanically consume depth. Long memory in trade signs need not
+imply easily exploitable return predictability: impact can be transient or
+state-dependent and execution costs absorb it.
+
+Hasbrouck-style vector autoregressions, Kyle's linear model, and structural
+microstructure models quantify different notions of information and impact. They
+rely on timestamp alignment and trade classification that vary across venues.
+
+\begin{example}[Kyle impact]
+In a one-period Gaussian model, an informed trader submits $x=\beta(v-p_0)$ and noise
+traders submit $u$. A competitive market maker sets
+$p=\E[v\mid x+u]=p_0+\lambda(x+u)$. Linear equilibrium chooses $\beta$ and
+$\lambda$ so the informed trader optimizes profit and the market maker breaks even.
+Impact $\lambda$ rises with fundamental uncertainty and falls with noise-trading
+scale.
+\end{example}
+
+\section{Transaction-cost models}
+
+A simple cost for trade $\Delta w$ is
+\[
+C(\Delta w)=
+\underbrace{\sum_i c_i\abs{\Delta w_i}}_{\text{spread and fees}}
++\underbrace{\sum_i k_i\abs{\Delta w_i}^{3/2}}_{\text{nonlinear impact}}.
+\]
+The square-root impact rule is an empirical approximation, not universal. Participation
+rate, volatility, volume, urgency, venue, and order type matter.
+
+Portfolio turnover can be defined as
+$\frac12\sum_i\abs{w_{i,t}^{\mathrm{target}}-w_{i,t}^{\mathrm{pretrade}}}$.
+State which convention is used. Costs must apply to dollar trades after accounting
+for drift in pre-trade weights.
+
+\section{Optimal execution}
+
+In the Almgren--Chriss framework, a trader liquidates inventory $x(t)$ by balancing
+expected temporary impact against variance from holding risk. A continuous
+objective is
+\[
+\min_{x(0)=X,\ x(T)=0}
+\int_0^T\left(\eta\dot x(t)^2+
+\lambda\sigma^2x(t)^2\right)\dd t.
+\]
+The Euler--Lagrange equation is
+$\eta\ddot x=\lambda\sigma^2x$, producing a hyperbolic-sine schedule. Larger risk
+aversion or volatility accelerates trading; greater temporary impact slows it.
+
+Real execution adds stochastic liquidity, price limits, queues, hidden orders,
+fill uncertainty, multiple venues, and feedback between child orders and signals.
+
+\section{Timestamps and backtests}
+
+A research row should distinguish:
+
+\begin{itemize}
+\item event time when the economic event occurs;
+\item publication time when a vendor makes data available;
+\item ingestion time when the strategy receives it;
+\item decision time when the signal is frozen;
+\item execution window and settlement.
+\end{itemize}
+
+Trading at the close with a signal computed from that same official close is usually
+impossible unless an executable auction mechanism and submission cutoff are modeled.
+Daily bar data hide the path and queue within the bar.
+
+\section{Capacity and crowding}
+
+Capacity is the capital at which expected marginal alpha equals marginal costs and
+constraints. Scaling leverage leaves returns unchanged only in a frictionless
+linear model. Impact, borrow availability, margin, concentration, and correlated
+liquidation make strategy P\&L nonlinear in capital.
+
+Crowding matters when many strategies share factors, signals, or risk controls.
+During deleveraging, normally diverse positions can become correlated through common
+flows. Stress tests should include spread widening, volume collapse, borrow recall,
+and delayed execution.
+
+\section{Market integrity}
+
+Research must distinguish legitimate liquidity provision from manipulative intent.
+Spoofing, layering, wash trading, misuse of confidential order information, and
+trading on material nonpublic information raise legal and ethical issues beyond
+model performance. Market-data licenses can restrict storage, redistribution, and
+publication.
+
+\section{Problems}
+
+\begin{exercise}[Core: bid--ask bounce]
+Assume a constant efficient price and independent trade signs. Compute the
+first-order autocovariance of transaction-price changes.
+\end{exercise}
+\begin{exercise}[Core: optimal execution]
+Solve the Euler--Lagrange equation for the stated boundary conditions and examine
+the risk-neutral limit $\lambda\downarrow0$.
+\end{exercise}
+\begin{exercise}[Research]
+Design a transaction-cost calibration using order or bar data. Specify target,
+features, sample split, weighting, and how you would handle endogenous order size.
+\end{exercise}
+
+
+\chapter{Arbitrage, Collateral, and Financial Engineering Practice}
+
+\begin{objectives}
+Use replication and dominance arguments, understand collateralized valuation,
+recognize counterparty and funding adjustments, and establish a professional model
+governance process.
+\end{objectives}
+
+\section{Law of one price and arbitrage}
+
+If two portfolios deliver identical cash flows in every state and have identical
+institutional treatment, they must have the same price in an ideal market. An
+arbitrage is a self-financing strategy with zero or negative initial cost,
+nonnegative terminal value almost surely, and positive value with positive
+probability.
+
+The phrase identical institutional treatment matters. Assets can differ in
+liquidity, financing eligibility, taxes, capital charges, haircuts, legal netting,
+or delivery optionality. A price basis can compensate these differences without
+being a free lunch.
+
+\section{State prices and complete markets}
+
+In a finite-state one-period economy, let payoff matrix $X\in\R^{S\times N}$ and
+price vector $p$. A positive state-price vector $q>0$ prices assets when
+$p=X^\transpose q$. Absence of arbitrage is equivalent to existence of such a
+strictly positive linear pricing functional under standard finite-dimensional
+conditions.
+
+The market is complete if $\rank(X)=S$: every state-contingent payoff is replicable
+and state prices are unique. In incomplete markets, arbitrage-free prices of an
+unspanned claim form an interval or depend on an added criterion.
+
+\begin{theorem}[Finite-state fundamental theorem]
+In a finite one-period market, no arbitrage holds if and only if there exists
+$q\in\R^S$ with $q_s>0$ and $p=X^\transpose q$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+If positive state prices exist, any nonnegative nonzero payoff has positive cost, so
+no arbitrage exists. Conversely, separation of the attainable-payoff cone from a
+strictly positive payoff produces a positive linear functional agreeing with market
+prices.
+\end{proof}
+
+\section{Collateral and discounting}
+
+A collateral agreement specifies eligible assets, currency, threshold, minimum
+transfer amount, frequency, haircut, and remuneration. If variation margin is
+continuous, cash, and remunerated at overnight rate $c_t$, a stylized collateralized
+payoff is discounted at $c$:
+\[
+V_t=\E_t^\Q\left[
+\e^{-\int_t^Tc_s\dd s}H_T
+\right].
+\]
+Changing collateral currency can change value through funding and cross-currency
+basis. Optional collateral currency is itself an option.
+
+\section{Counterparty credit and valuation adjustments}
+
+Positive future exposure creates loss if the counterparty defaults. Expected
+positive exposure at $t$ is $\E[V_t^+]$; potential future exposure is a quantile.
+A stylized unilateral CVA is
+\[
+\mathrm{CVA}\approx
+(1-R)\int_0^T
+\E^\Q[D(0,t)V_t^+\mid\tau=t]\,\dd\Prob^\Q(\tau\leq t).
+\]
+Wrong-way risk occurs when exposure rises as counterparty credit quality deteriorates.
+
+Modern valuation adjustment language also includes DVA for own default, FVA for
+funding, MVA for initial margin, and KVA for capital. Summing independently computed
+adjustments can double-count effects; the institution needs a consistent replication
+and accounting framework.
+
+\section{Hedging as a control problem}
+
+A model price is only one output. A desk holds a hedging policy under discrete
+trading, transaction costs, jumps, liquidity limits, and parameter uncertainty.
+Hedging P\&L decomposes into model theta, realized gamma, volatility repricing,
+cross-Greeks, carry, funding, and residual.
+
+For a delta-hedged option over a short interval under continuous diffusion,
+\[
+\Delta\Pi\approx
+\frac12\Gamma S^2
+(\sigma_{\mathrm{real}}^2-\sigma_{\mathrm{imp}}^2)\Delta t
+\]
+under a simplified convention. The formula motivates variance trading but omits
+jumps, surface dynamics, costs, and discrete hedge error.
+
+\section{Model lifecycle}
+
+A controlled model process contains:
+
+\begin{enumerate}
+\item purpose, owner, users, and prohibited uses;
+\item mathematical specification and assumptions;
+\item data lineage and implementation tests;
+\item calibration and benchmark comparison;
+\item sensitivity, stress, and limitation analysis;
+\item independent validation and approval;
+\item monitoring thresholds and change control;
+\item retirement or remediation criteria.
+\end{enumerate}
+
+Verification asks whether code correctly implements the specification. Validation
+asks whether the specification is adequate for its use. A correct implementation of
+an unsuitable model is still model risk.
+
+\section{Reproducibility and auditability}
+
+Every reported number should be traceable to immutable raw data or an identified
+vendor query, code version, configuration, dependency environment, and generation
+timestamp. Random seeds support debugging but do not create statistical validity.
+Figures should expose units, sampling frequency, and whether returns include
+distributions.
+
+\begin{researchnote}
+A strong quant portfolio is not a gallery of final Sharpe ratios. It is a chain of
+questions, mathematical arguments, failed specifications, robustness checks, and
+reproducible decisions.
+\end{researchnote}
+
+\section{Problems}
+
+\begin{exercise}[Core: state prices]
+For two states and a bond plus stock, solve state prices and price a call. Determine
+when the market is complete.
+\end{exercise}
+\begin{exercise}[Core: CVA]
+Explain the difference between exposure under the physical and pricing measures.
+Which belongs in pricing and which in risk-management scenario design?
+\end{exercise}
+\begin{exercise}[Advanced: governance]
+Write a validation plan for an illiquid-option model. Include benchmarks, data
+limitations, hedging tests, uncertainty, and usage restrictions.
+\end{exercise}

@@ -1,0 +1,507 @@
+\chapter{Discrete-Time Derivative Pricing}
+
+\begin{objectives}
+Price derivatives by replication in one- and multi-period trees, understand
+completeness and early exercise, and derive convergence toward continuous-time
+models.
+\end{objectives}
+
+\section{One-period binomial economy}
+
+Let a stock cost $S_0$ and move to $S_u=uS_0$ or $S_d=dS_0$, with
+$d<R<u$ where $R$ is the risk-free gross return. A claim pays $H_u,H_d$. Choose
+$\Delta$ shares and cash $B$ so
+\[
+\Delta S_u+RB=H_u,\qquad
+\Delta S_d+RB=H_d.
+\]
+Solving,
+\[
+\Delta=\frac{H_u-H_d}{S_0(u-d)},\qquad
+B=\frac{uH_d-dH_u}{R(u-d)}.
+\]
+The no-arbitrage value is $V_0=\Delta S_0+B$.
+
+Define risk-neutral probability
+\[
+q=\frac{R-d}{u-d}\in(0,1).
+\]
+Then
+\[
+V_0=\frac1R[qH_u+(1-q)H_d].
+\]
+The physical up probability never entered replication. It matters for risk and
+forecasting, not the unique price in this complete tree.
+
+\begin{theorem}[No-arbitrage condition]
+The one-period stock--bond binomial market is arbitrage free if and only if
+$d<R<u$. It is complete when $u\neq d$.
+\end{theorem}
+\begin{proof}
+If $R\leq d$, borrowing to buy stock has nonnegative payoff in both states and a
+strict gain in at least one; similarly $R\geq u$ supports the opposite trade. If
+$d<R<u$, $q\in(0,1)$ gives strictly positive state prices, excluding arbitrage.
+The two linearly independent securities span the two states.
+\end{proof}
+
+\section{Multi-period trees}
+
+At each node, value satisfies backward recursion
+\[
+V_{t}=\frac1R\left(qV_{t+1}^{u}+(1-q)V_{t+1}^{d}\right).
+\]
+The replicating delta is recomputed at every node, making the hedge dynamic and
+self-financing. In a recombining $n$-step tree a European payoff has
+\[
+V_0=R^{-n}\sum_{j=0}^n
+\binom{n}{j}q^j(1-q)^{n-j}
+H(S_0u^jd^{n-j}).
+\]
+
+The Cox--Ross--Rubinstein parameterization for step $\Delta t$ uses
+$u=\e^{\sigma\sqrt{\Delta t}}$, $d=u^{-1}$, and
+$R=\e^{(r-q_d)\Delta t}$. As the grid is refined, the log-price random walk
+converges weakly to geometric Brownian motion under appropriate conditions.
+
+\section{American exercise}
+
+At an American-option node,
+\[
+V_t=\max\left\{h(S_t),
+\frac1R\E_t^\Q[V_{t+1}]\right\}.
+\]
+This is an optimal stopping problem. The value process is the smallest
+supermartingale dominating the discounted exercise payoff, the Snell envelope.
+
+\begin{proposition}[No early exercise for a non-dividend call]
+With nonnegative rates and no dividends, it is never optimal to exercise an American
+call before maturity.
+\end{proposition}
+\begin{proof}
+By put--call parity and $P_t\geq0$,
+$C_t\geq S_t-KP(t,T)\geq S_t-K$. Continuation value is at least intrinsic value, and
+exercise destroys remaining optionality and the financing benefit of delaying $K$.
+\end{proof}
+
+American puts and dividend-paying calls can exercise early. A tree must align
+dividend dates, exercise opportunities, and contract conventions.
+
+\section{Incomplete trees and bounds}
+
+If there are more states than independent traded securities, replication may fail.
+Sub- and super-replication define no-arbitrage price bounds:
+\[
+\pi_{\mathrm{sub}}(H)\leq V_0\leq\pi_{\mathrm{super}}(H).
+\]
+A utility indifference price, minimal entropy measure, or calibrated model selects a
+point only by adding criteria beyond no arbitrage.
+
+\section{Problems}
+
+\begin{exercise}[Core: two-step call]
+Price and replicate a two-step European call. Record delta and cash at every node
+and verify terminal payoffs.
+\end{exercise}
+\begin{exercise}[Core: American put]
+Construct a two-step example where early put exercise is optimal and explain the
+roles of rate and moneyness.
+\end{exercise}
+\begin{exercise}[Advanced: convergence]
+Match the first two conditional moments of the CRR log return and show their limits
+as $\Delta t\downarrow0$.
+\end{exercise}
+
+
+\chapter{Black--Scholes--Merton Theory and Greeks}
+
+\begin{objectives}
+Derive the pricing PDE and closed form, understand hedging and Greeks, and identify
+exactly which conclusions rely on which assumptions.
+\end{objectives}
+
+\section{Market assumptions}
+
+In the benchmark model,
+\[
+\dd S_t=(\mu-q)S_t\dd t+\sigma S_t\dd W_t^\Prob,\qquad
+\dd B_t=rB_t\dd t,
+\]
+with constant $\sigma>0$, deterministic $r,q$, continuous trading, no jumps,
+frictionless markets, unrestricted admissible trading, and a European payoff. The
+stock including dividends earns drift $\mu$.
+
+Under the pricing measure,
+\[
+\dd S_t=(r-q)S_t\dd t+\sigma S_t\dd W_t^\Q.
+\]
+
+\section{Delta-hedging derivation}
+
+For value $V(t,S)$, Itô's formula gives
+\[
+\dd V=\left(V_t+(\mu-q)SV_S+\frac12\sigma^2S^2V_{SS}\right)\dd t
++\sigma SV_S\dd W.
+\]
+Hold one derivative and short $\Delta=V_S$ shares. After incorporating dividend on
+the stock hedge, stochastic risk cancels. No arbitrage makes the locally riskless
+portfolio earn $r$, yielding
+\[
+V_t+(r-q)SV_S+\frac12\sigma^2S^2V_{SS}-rV=0.
+\]
+The physical drift $\mu$ cancels because the source of diffusion risk is spanned.
+
+\section{Risk-neutral valuation}
+
+Feynman--Kac gives
+\[
+V(t,S)=\e^{-r\tau}\E^\Q[h(S_T)\mid S_t=S],
+\qquad \tau=T-t,
+\]
+with
+\[
+\log S_T\mid S_t
+\sim N\left(\log S+(r-q-\tfrac12\sigma^2)\tau,\sigma^2\tau\right).
+\]
+
+\begin{theorem}[European call and put]
+\[
+C=S\e^{-q\tau}\Phi(d_1)-K\e^{-r\tau}\Phi(d_2),
+\]
+\[
+P=K\e^{-r\tau}\Phi(-d_2)-S\e^{-q\tau}\Phi(-d_1),
+\]
+where
+\[
+d_1=\frac{\log(S/K)+(r-q+\frac12\sigma^2)\tau}
+{\sigma\sqrt\tau},\qquad
+d_2=d_1-\sigma\sqrt\tau.
+\]
+\end{theorem}
+\begin{proof}
+Write the call as
+$\e^{-r\tau}(\E^\Q[S_T\ind_{S_T>K}]
+-K\Prob^\Q(S_T>K))$. Standardizing the lognormal threshold gives
+$\Prob^\Q(S_T>K)=\Phi(d_2)$. Exponential tilting of the normal density gives
+$\E^\Q[S_T\ind_{S_T>K}]=S\e^{(r-q)\tau}\Phi(d_1)$. The put follows from parity.
+\end{proof}
+
+\section{Greeks}
+
+For a call,
+\[
+\Delta_C=\e^{-q\tau}\Phi(d_1),\qquad
+\Gamma=\frac{\e^{-q\tau}\phi(d_1)}{S\sigma\sqrt\tau},
+\]
+\[
+\mathcal V=\frac{\partial C}{\partial\sigma}
+=S\e^{-q\tau}\phi(d_1)\sqrt\tau,
+\]
+\[
+\Theta_C=
+-\frac{S\e^{-q\tau}\phi(d_1)\sigma}{2\sqrt\tau}
+-rK\e^{-r\tau}\Phi(d_2)
++qS\e^{-q\tau}\Phi(d_1),
+\]
+\[
+\rho_C=K\tau\e^{-r\tau}\Phi(d_2).
+\]
+Greek units matter: vega above is per absolute volatility unit, so divide by $100$
+for a one-volatility-point move.
+
+The PDE implies a theta--gamma--carry relation. For a delta-hedged option, time decay
+compensates for expected gamma gains under the model. Large gamma near expiry makes
+discrete hedging difficult exactly when theta is largest.
+
+\section{Discrete hedging error}
+
+With true realized quadratic variation different from model variance, a continuous
+delta-hedge approximation gives
+\[
+\Pi_T-\Pi_0\e^{rT}
+\approx\frac12\int_0^T
+\e^{r(T-t)}\Gamma_tS_t^2
+(\dd\langle\log S\rangle_t-\sigma_{\mathrm{model}}^2\dd t)
+\]
+before costs and jumps. Discrete rebalancing adds error of order depending on mesh,
+payoff regularity, and strategy. Transaction costs grow with trading frequency, so
+continuous hedging is not an operational limit without a cost model.
+
+\section{Digital options and density}
+
+A cash-or-nothing call pays $\ind_{\{S_T>K\}}$ and is worth
+$\e^{-r\tau}\Phi(d_2)$. Under regularity,
+\[
+-\frac{\partial C(K,T)}{\partial K}
+=P(t,T)\Q(S_T>K),\qquad
+\frac{\partial^2 C(K,T)}{\partial K^2}
+=P(t,T)f^\Q_{S_T}(K).
+\]
+Thus a continuum of option prices reveals the risk-neutral terminal distribution.
+Noise and discrete strikes make differentiation an ill-posed estimation problem
+requiring arbitrage-aware smoothing.
+
+\section{Problems}
+
+\begin{exercise}[Core: Greeks]
+Differentiate the call formula to obtain delta, gamma, and vega. Use the identity
+$S\e^{-q\tau}\phi(d_1)=K\e^{-r\tau}\phi(d_2)$.
+\end{exercise}
+\begin{exercise}[Core: PDE]
+Verify that the call formula satisfies the PDE, terminal condition, and boundary
+behavior.
+\end{exercise}
+\begin{exercise}[Advanced: digital replication]
+Show that a tight call spread converges to a digital payoff and quantify the finite
+strike-spacing approximation.
+\end{exercise}
+
+
+\chapter{Volatility Surfaces, Local and Stochastic Volatility}
+
+\begin{objectives}
+Construct arbitrage-consistent volatility surfaces, derive local volatility, study
+stochastic-volatility dynamics, and distinguish calibration fit from hedging validity.
+\end{objectives}
+
+\section{Why volatility is a surface}
+
+Market implied volatility depends on strike and maturity. Equity index smiles often
+show expensive downside protection; term structure changes with event and regime.
+Quoting implied volatility normalizes option prices but preserves model dependence.
+
+Useful coordinates include log forward moneyness
+$k=\log(K/F_{t,T})$, delta, and total variance
+$w(k,T)=\sigma_{\mathrm{imp}}^2(k,T)T$. Interpolating raw volatility independently
+can create arbitrage even when input quotes are valid.
+
+\section{Static-arbitrage restrictions}
+
+For fixed $T$, undiscounted call price is decreasing and convex in $K$:
+\[
+\partial_K C\leq0,\qquad \partial_{KK}C\geq0.
+\]
+It lies between intrinsic lower bounds and the prepaid forward. Across maturities,
+calendar consistency is naturally expressed for option prices under aligned forwards
+and discounting; total variance should not decrease under simplified settings.
+
+Butterfly arbitrage corresponds to negative risk-neutral density. Calendar arbitrage
+corresponds to a more valuable shorter-dated claim under conditions where the
+longer-dated claim contains it.
+
+\section{Dupire local volatility}
+
+Assume under $\Q$
+\[
+\frac{\dd S_t}{S_t}=(r_t-q_t)\dd t+\sigma_{\mathrm{loc}}(t,S_t)\dd W_t.
+\]
+Given a sufficiently smooth arbitrage-free call surface,
+\[
+\sigma_{\mathrm{loc}}^2(T,K)=
+\frac{\partial_T C+(r-q)K\partial_K C+qC}
+{\frac12K^2\partial_{KK}C}
+\]
+for deterministic rates and yields under the stated convention.
+
+Local volatility exactly matches the one-time marginal distributions encoded by the
+surface. It does not necessarily reproduce joint dynamics, forward smiles, or
+realistic spot--volatility co-movement. Numerical differentiation amplifies quote
+noise, especially through $\partial_{KK}C$.
+
+\section{Heston stochastic volatility}
+
+The Heston model under $\Q$ is
+\[
+\frac{\dd S_t}{S_t}=(r-q)\dd t+\sqrt{v_t}\dd W_t^S,
+\]
+\[
+\dd v_t=\kappa(\theta-v_t)\dd t+\xi\sqrt{v_t}\dd W_t^v,\qquad
+\dd\langle W^S,W^v\rangle_t=\rho\dd t.
+\]
+Mean reversion is controlled by $\kappa$, long-run variance by $\theta$, volatility
+of variance by $\xi$, and skew by $\rho$. The Feller condition
+$2\kappa\theta\geq\xi^2$ keeps zero unattainable under one common classification but
+is not required for every numerical scheme or admissible calibration.
+
+The characteristic function is affine and supports Fourier pricing. Parameters can
+be poorly identified from a narrow option panel: $\kappa$ and $\theta$, for example,
+may trade off while producing similar maturities.
+
+\section{SABR}
+
+For forward $F$,
+\[
+\dd F_t=\alpha_tF_t^\beta\dd W_t^1,\qquad
+\dd\alpha_t=\nu\alpha_t\dd W_t^2,\qquad
+\dd\langle W^1,W^2\rangle_t=\rho\dd t.
+\]
+SABR is widely used to interpolate smiles, especially in rates. $\beta$ controls
+backbone, $\nu$ smile curvature, and $\rho$ skew. Common asymptotic implied-volatility
+formulas can be inaccurate at long maturity, extreme strikes, or near boundaries.
+
+\section{Jumps and Lévy models}
+
+Merton's jump diffusion adds compound Poisson lognormal jumps. Variance gamma and
+CGMY use infinite-activity Lévy processes. Jumps create short-maturity skew and
+kurtosis that continuous diffusions struggle to match.
+
+Risk-neutral jump intensity and distribution are not physical jump forecasts.
+Hedging jump risk is incomplete when no traded asset spans it; calibration chooses
+prices consistent with selected instruments rather than manufacturing completeness.
+
+\section{Calibration}
+
+For quotes $P_i^{\mathrm{mkt}}$ and weights $w_i$,
+\[
+\widehat\theta=
+\argmin_{\theta\in\Theta}
+\sum_iw_i(P_i^{\mathrm{model}}(\theta)-P_i^{\mathrm{mkt}})^2
++\lambda\mathcal R(\theta).
+\]
+Price-error weighting, vega weighting, relative errors, and bid--ask normalization
+answer different questions. A robust workflow checks:
+
+\begin{itemize}
+\item no-arbitrage cleaning and quote timestamps;
+\item multiple starting values and parameter bounds;
+\item residuals by strike and maturity;
+\item stability across days;
+\item prices of withheld instruments;
+\item hedge performance and scenario behavior;
+\item parameter uncertainty and numerical tolerance.
+\end{itemize}
+
+\begin{warning}
+Six decimal places in a calibrated parameter are usually optimizer output, not six
+decimal places of economic information.
+\end{warning}
+
+\section{Problems}
+
+\begin{exercise}[Core: convexity]
+Use a butterfly portfolio to prove convexity of call price in strike.
+\end{exercise}
+\begin{exercise}[Core: Heston moments]
+Derive $\E[v_t\mid v_0]$ and the long-run mean. Discuss what changes under the
+physical measure.
+\end{exercise}
+\begin{exercise}[Advanced: Dupire]
+Derive the Dupire equation from the forward equation for the transition density and
+integration by parts.
+\end{exercise}
+
+
+\chapter{Exotic Derivatives and Incomplete-Market Hedging}
+
+\begin{objectives}
+Analyze path-dependent payoffs, apply change-of-numeraire methods, value options with
+exercise features, and measure hedging risk in incomplete markets.
+\end{objectives}
+
+\section{Change of numeraire}
+
+Let $N_t>0$ be a traded numeraire. There exists an associated measure $\Q^N$ under
+which every traded price divided by $N$ is a martingale:
+\[
+\frac{V_t}{N_t}=
+\E_t^{\Q^N}\left[\frac{V_T}{N_T}\right].
+\]
+Choosing a zero-coupon bond as numeraire gives a forward measure, under which the
+corresponding forward price is a martingale. This simplifies caplet, swaption, and
+quanto calculations by matching measure to payoff.
+
+\section{Asian options}
+
+An arithmetic-average call pays
+\[
+\left(\frac1n\sum_{j=1}^nS_{t_j}-K\right)^+.
+\]
+The arithmetic average of lognormal variables is not lognormal, so no Black--Scholes
+closed form exists. Geometric-average options are tractable and provide control
+variates. Bounds follow from Jensen and comonotonic constructions.
+
+\section{Barrier options}
+
+A down-and-out call ceases to exist if spot reaches barrier $H<S_0$. Continuous
+monitoring differs from daily monitoring because crossings can occur between
+observations. Reflection-principle formulas exist in Black--Scholes for standard
+contracts. Greeks become sharp near the barrier and discrete hedge error grows.
+
+In--out parity gives
+\[
+V_{\mathrm{vanilla}}=V_{\mathrm{knock\mbox{-}in}}+
+V_{\mathrm{knock\mbox{-}out}}
+\]
+when rebates and monitoring conventions align.
+
+\section{Lookbacks and cliquets}
+
+Lookback payoffs depend on running maximum or minimum. Cliquets lock periodic
+returns subject to local and global caps or floors. Their values depend strongly on
+the joint forward volatility surface, not only today's marginal smiles. A model
+calibrated to vanillas can therefore disagree materially on exotics.
+
+\section{Bermudan options and least-squares Monte Carlo}
+
+At exercise dates $t_m$, a Bermudan value is
+\[
+V_{t_m}=\max\{h(X_{t_m}),\E^\Q[D_{m,m+1}V_{t_{m+1}}\mid X_{t_m}]\}.
+\]
+Least-squares Monte Carlo regresses discounted continuation cash flows on basis
+functions of state among relevant paths, then compares fitted continuation with
+exercise value.
+
+Using the same paths to fit and value creates in-sample bias. Independent valuation
+paths, cross-fitting, basis sensitivity, and dual upper bounds improve credibility.
+The exercise rule should respect all state variables, not spot alone when rates or
+volatility are stochastic.
+
+\section{Variance and volatility derivatives}
+
+A variance swap pays realized variance minus fixed strike. Under ideal continuous
+sampling and diffusion,
+\[
+\int_0^T\sigma_t^2\dd t
+=2\int_0^T\frac{\dd S_t}{S_t}
+-2\log\frac{S_T}{S_0}
+\]
+after appropriate drift terms. A log contract can be replicated by a continuum of
+out-of-the-money options, giving a model-light fair variance strike under carefully
+stated jump and discretization conventions.
+
+Volatility swap payoff uses square root of variance, so Jensen creates a convexity
+adjustment; it cannot be priced by simply taking the square root of variance-swap
+strike.
+
+\section{Quanto and correlation risk}
+
+A quanto pays an asset return in a different currency at a fixed exchange rate.
+Under the domestic pricing measure, covariance between the foreign asset and FX
+changes its drift. This quanto adjustment makes correlation a first-order input.
+Cross-asset derivatives reveal why specifying only marginal models is insufficient.
+
+\section{Hedging in incomplete markets}
+
+When risk is unspanned, exact replication is impossible. A minimum-variance hedge
+chooses strategy $\phi$ to minimize
+\[
+\E[(H-V_0-G_T(\phi))^2].
+\]
+The Galtchouk--Kunita--Watanabe decomposition writes payoff into initial value,
+stochastic integral with traded assets, and an orthogonal residual. Utility
+indifference and risk-measure hedges choose different objectives and therefore
+different prices.
+
+\section{Problems}
+
+\begin{exercise}[Core: geometric Asian]
+Derive the distribution of a discretely sampled geometric average under
+Black--Scholes and write its call value.
+\end{exercise}
+\begin{exercise}[Core: variance replication]
+Show how a twice differentiable payoff can be statically represented using cash,
+forward, and a continuum of calls and puts. Apply it to $-\log S_T$.
+\end{exercise}
+\begin{exercise}[Advanced: LSM]
+Implement least-squares Monte Carlo for an American put and report lower-bound
+stability across bases, paths, and time steps.
+\end{exercise}

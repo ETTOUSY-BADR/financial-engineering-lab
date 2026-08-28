@@ -1,0 +1,456 @@
+\chapter{Portfolio Theory and Estimation}
+
+\begin{objectives}
+Derive efficient portfolios, understand estimation error, apply shrinkage and robust
+construction, and evaluate portfolios through implementable out-of-sample decisions.
+\end{objectives}
+
+\section{Returns and wealth}
+
+For simple return $R_t=(P_t+D_t)/P_{t-1}-1$, wealth compounds as
+$W_T=W_0\prod_t(1+R_t)$. Log return $r_t=\log(1+R_t)$ adds through time.
+Cross-sectionally, portfolio simple return is $R_{p,t}=w_{t-1}^\transpose R_t$ for
+pre-return weights. Portfolio log return is not the weighted average of asset log
+returns.
+
+Annual arithmetic mean is often scaled by periods; volatility by square root of
+periods under stationarity and suitable dependence. Long-horizon quantiles and
+drawdowns do not obey a universal square-root rule.
+
+\section{Mean--variance optimization}
+
+For expected return $\mu$ and covariance $\Sigma$,
+\[
+\max_w\left\{w^\transpose\mu-\frac{\gamma}{2}w^\transpose\Sigma w\right\}
+\quad\text{s.t.}\quad\ones^\transpose w=1.
+\]
+With a risk-free asset and unconstrained risky weights, the tangency direction is
+$\Sigma^{-1}(\mu-r_f\ones)$. Its maximum squared Sharpe ratio is
+\[
+SR_{\max}^2=(\mu-r_f\ones)^\transpose
+\Sigma^{-1}(\mu-r_f\ones).
+\]
+
+This is an ex ante population statement. Replacing inputs by noisy estimates can
+produce extreme weights and poor realized performance.
+
+\section{Estimation error}
+
+Expected returns are much harder to estimate than covariance at ordinary horizons.
+Optimization maps small errors through $\Sigma^{-1}$, emphasizing directions of
+apparently low risk that often correspond to noise.
+
+Sampling uncertainty is only one issue. Structural change, survivorship,
+asynchronous markets, stale holdings, and benchmark revisions create model and data
+uncertainty. Report weights and risk contributions, not just the objective value.
+
+\section{Covariance shrinkage}
+
+A linear shrinkage estimator is
+\[
+\widehat\Sigma_\delta=
+\delta F+(1-\delta)S,\qquad \delta\in[0,1],
+\]
+where $S$ is sample covariance and $F$ a structured target. Shrinkage trades some
+bias for lower variance and improved conditioning.
+
+Factor covariance uses
+$B\Sigma_fB^\transpose+D$. Robust covariance estimators reduce outlier sensitivity.
+Exponentially weighted estimates adapt to changing volatility but reduce effective
+sample size.
+
+\section{Expected-return shrinkage and views}
+
+Bayesian or empirical-Bayes estimation shrinks noisy asset means toward a grand mean
+or factor-implied prior. Black--Litterman starts from equilibrium-implied excess
+returns
+\[
+\pi=\delta\Sigma w_{\mathrm{mkt}}
+\]
+and combines views $P\mu=q+\text{noise}$ with a prior. Posterior mean depends on view
+uncertainty and prior scaling; these are economic inputs, not tuning after seeing
+performance.
+
+\section{Constraints and regularization}
+
+Long-only, leverage, box, sector, factor, turnover, and tracking-error constraints
+stabilize portfolios while encoding mandate. A generic program is
+\[
+\min_w\frac12w^\transpose\widehat\Sigma w
+-\lambda w^\transpose\widehat\mu
++\eta\norm{w-w_{\mathrm{prev}}}_1
+\]
+subject to exposure constraints. The turnover penalty approximates linear costs.
+Constraints create shadow prices that quantify the value of relaxing a mandate under
+the model.
+
+\section{Resampling and robust portfolios}
+
+Resampled efficiency averages optimized weights across simulated inputs. Distributionally
+robust optimization protects against laws in an ambiguity set. Worst-case methods
+can be conservative; uncertainty sets must be calibrated before observing desired
+weights.
+
+The one-over-$N$ portfolio is a serious benchmark. A complex method must earn its
+estimation and trading costs relative to equal weight, global minimum variance, and
+a simple factor-balanced allocation.
+
+\section{Problems}
+
+\begin{exercise}[Core: tangency]
+Derive the tangency direction and maximum Sharpe ratio using Cauchy--Schwarz.
+\end{exercise}
+\begin{exercise}[Core: shrinkage]
+Show that a convex combination of positive semidefinite covariance matrices remains
+positive semidefinite. When is it positive definite?
+\end{exercise}
+\begin{exercise}[Advanced: sensitivity]
+Differentiate unconstrained mean--variance weights with respect to $\mu$ and
+$\Sigma$. Identify why small eigenvalues amplify error.
+\end{exercise}
+
+
+\chapter{Risk Measures, Backtesting, and Stress}
+
+\begin{objectives}
+Define coherent and convex risk measures, estimate VaR and Expected Shortfall,
+backtest forecasts, and design scenarios that expose rather than conceal model
+limitations.
+\end{objectives}
+
+\section{Loss conventions}
+
+Let $L=-\Delta V$ be positive when money is lost. A risk number without horizon,
+confidence, currency, valuation time, data window, and treatment of positions is
+ambiguous.
+
+\begin{definition}[Value at Risk]
+\[
+\VaR_\alpha(L)=\inf\{\ell:\Prob(L\leq\ell)\geq\alpha\}.
+\]
+\end{definition}
+
+\begin{definition}[Expected Shortfall]
+A general definition is
+\[
+\ES_\alpha(L)=
+\frac{1}{1-\alpha}\int_\alpha^1\VaR_u(L)\dd u.
+\]
+For a continuous distribution, this equals
+$\E[L\mid L\geq\VaR_\alpha(L)]$.
+\end{definition}
+
+\section{Coherent risk}
+
+A risk measure $\rho$ is coherent when it is monotone, translation invariant,
+positively homogeneous, and subadditive. Convex risk measures replace homogeneity
+and subadditivity by convexity, allowing liquidity or concentration penalties.
+
+\begin{theorem}[Expected Shortfall is coherent]
+For integrable losses, $\ES_\alpha$ satisfies the four coherence axioms.
+\end{theorem}
+\begin{proof}
+Use the representation
+\[
+\ES_\alpha(L)=
+\inf_{z\in\R}\left\{
+z+\frac{1}{1-\alpha}\E[(L-z)^+]
+\right\}.
+\]
+Monotonicity and translation follow directly. Positive homogeneity follows by
+scaling $z$. Subadditivity uses
+$(X+Y-z_X-z_Y)^+\leq(X-z_X)^++(Y-z_Y)^+$ and takes infima.
+\end{proof}
+
+VaR is not generally subadditive for discontinuous or heavy-tailed losses. Under
+elliptical distributions it may behave well, but coherence is a property over a
+declared domain.
+
+\section{Parametric and historical estimation}
+
+Under normal $L\sim N(\mu_L,\sigma_L^2)$,
+\[
+\VaR_\alpha=\mu_L+\sigma_Lz_\alpha,\qquad
+\ES_\alpha=\mu_L+
+\sigma_L\frac{\phi(z_\alpha)}{1-\alpha}.
+\]
+Student tails, mixtures, filtered historical simulation, Monte Carlo, and EVT change
+tail assumptions. Historical simulation places zero probability beyond observed
+losses and assumes the selected past is representative.
+
+Filtered historical simulation standardizes returns by estimated conditional
+volatility, resamples residuals, then applies current volatility. This separates
+scale dynamics from residual shape but inherits both model and resampling assumptions.
+
+\section{Marginal and component risk}
+
+For differentiable homogeneous $\rho(w)$, Euler's theorem gives
+\[
+\rho(w)=\sum_iw_i\frac{\partial\rho}{\partial w_i}.
+\]
+Component risk is $CR_i=w_i\partial\rho/\partial w_i$. It allocates the current
+portfolio's risk but is not the same as incremental risk from deleting a position,
+which is a finite change.
+
+\section{VaR and ES backtesting}
+
+For forecast $\widehat q_t$, exception $I_t=\ind_{\{L_t>\widehat q_t\}}$ should have
+rate $1-\alpha$. Kupiec tests unconditional rate; Christoffersen tests transition
+dependence. Quantile loss
+\[
+\ell_\alpha(q,L)=(\alpha-\ind_{\{L\leq q\}})(L-q)
+\]
+is strictly consistent for the quantile.
+
+ES alone is not elicitable by a scalar loss, but $(\VaR,\ES)$ is jointly elicitable
+under conditions. Compare models through proper scoring, calibration, and economic
+consequences, not only exception counts.
+
+\section{Stress testing}
+
+Historical stress replays observed shocks. Hypothetical stress imposes coherent
+factor moves. Reverse stress asks which scenario breaches a solvency or liquidity
+threshold:
+\[
+\min_{\Delta x}\ \Delta x^\transpose\Omega^{-1}\Delta x
+\quad\text{s.t.}\quad
+\Delta V(\Delta x)\leq-L^\star.
+\]
+This finds a most plausible damaging shock under metric $\Omega$, not the only
+dangerous scenario.
+
+Scenarios should propagate rates, volatility surfaces, spreads, FX, liquidity,
+defaults, collateral, and management actions consistently. Holding correlations
+fixed in stress can be the main error.
+
+\section{Liquidity risk}
+
+Market liquidity concerns executable price and depth; funding liquidity concerns
+ability to finance positions and margin. They interact through margin spirals.
+Liquidity-adjusted loss includes liquidation horizon and impact:
+\[
+L_{\mathrm{liq}}=L_{\mathrm{market}}+
+\sum_i\left(\frac{s_i}{2}Q_i+\eta_iQ_i^{3/2}\right).
+\]
+The horizon is position- and state-dependent. A ten-day scalar multiplier is not a
+substitute for a liquidation schedule.
+
+\section{Problems}
+
+\begin{exercise}[Core: ES]
+Derive normal Expected Shortfall by integrating the normal tail.
+\end{exercise}
+\begin{exercise}[Core: coherence]
+Give a two-position discrete example where VaR violates subadditivity.
+\end{exercise}
+\begin{exercise}[Advanced: reverse stress]
+Linearize portfolio loss and solve the Mahalanobis reverse-stress problem in closed
+form. Then discuss gamma effects.
+\end{exercise}
+
+
+\chapter{Risk Allocation, Drawdowns, and Alternative Objectives}
+
+\begin{objectives}
+Construct risk-parity and drawdown-aware portfolios, distinguish volatility from
+loss, and connect portfolio objectives to investor liabilities and horizons.
+\end{objectives}
+
+\section{Risk parity}
+
+For volatility $\sigma(w)=\sqrt{w^\transpose\Sigma w}$, component contribution is
+\[
+RC_i=w_i\frac{(\Sigma w)_i}{\sigma(w)}.
+\]
+Equal-risk-contribution portfolios solve $RC_i=\sigma/n$ under positive weights.
+One convex formulation minimizes
+\[
+\frac12w^\transpose\Sigma w-\sum_i b_i\log w_i
+\]
+and rescales the solution, where budgets $b_i>0$.
+
+Risk parity does not make assets equally risky in all states. Covariance estimation,
+volatility scaling, leverage, and concentration in a common macro factor determine
+economic exposure. Levered bonds can dominate liquidity and inflation stress.
+
+\section{Volatility targeting}
+
+A strategy with raw return $r_t$ and forecast volatility $\widehat\sigma_t$ uses
+exposure
+\[
+\ell_t=\min\left(\ell_{\max},
+\frac{\sigma^\star}{\widehat\sigma_t}\right).
+\]
+It reduces exposure after volatility rises. Performance can improve through risk
+stabilization and a negative return--volatility relation, but rapid deleveraging can
+sell into stress and contribute to crowding.
+
+The volatility estimate must use data through the decision time. Lag, rebalance
+frequency, cap, financing, and turnover define the strategy.
+
+\section{Drawdown}
+
+For wealth $W_t$, running peak $M_t=\max_{s\leq t}W_s$ and drawdown
+$D_t=1-W_t/M_t$. Maximum drawdown is path-dependent and its sample distribution
+depends strongly on horizon. It is not a coherent one-period risk measure.
+
+Conditional drawdown at risk and average drawdown measures focus on the distribution
+of drawdowns. Drawdown constraints create dynamic policies because the state includes
+the running maximum.
+
+\section{Kelly and risk of ruin}
+
+Log-optimal growth maximizes $\E[\log(W_{t+1}/W_t)]$. For repeated independent bets,
+it maximizes asymptotic growth under its model. It can accept deep interim drawdowns
+and is extremely sensitive to probability error and omitted tail outcomes.
+
+Fractional Kelly multiplies estimated optimal exposure by $0<f<1$. This sacrifices
+some modeled growth for reduced variance and parameter sensitivity. Hard ruin,
+margin, or drawdown constraints should be modeled explicitly rather than expected to
+emerge from log utility.
+
+\section{Liability-driven investment}
+
+An investor with liabilities cares about surplus
+$S_t=A_t-L_t$. Asset-only volatility can be misleading: a long-duration asset may be
+risky standalone but hedge a long-duration liability. Objectives include surplus
+variance, funding-ratio shortfall, and expected utility of contributions.
+
+Liability discounting itself can be regulatory, accounting, market-consistent, or
+actuarial. The chosen curve changes both measured funding and hedge.
+
+\section{Tracking error and active risk}
+
+For benchmark $w_b$, active weights $a=w-w_b$ have ex ante tracking error
+\[
+TE=\sqrt{a^\transpose\Sigma a}.
+\]
+Information ratio is expected active return divided by tracking error. Fundamental
+law approximations relate it to skill, breadth, and transfer coefficient under strong
+independence and stationarity assumptions.
+
+Constraints reduce the transfer from signal to portfolio. Active share measures
+weight deviation but ignores covariance. Report both holdings-based and risk-based
+measures.
+
+\section{Problems}
+
+\begin{exercise}[Core: ERC]
+Derive first-order conditions of the log-barrier risk-budgeting objective and show
+that risk contributions are proportional to $b_i$ after scaling.
+\end{exercise}
+\begin{exercise}[Core: surplus]
+Derive the minimum-variance asset hedge of a random liability using covariance
+projection.
+\end{exercise}
+\begin{exercise}[Advanced: drawdown state]
+Formulate a dynamic program for terminal utility with a maximum-drawdown constraint.
+Specify all state variables.
+\end{exercise}
+
+
+\chapter{Backtesting and Strategy Research}
+
+\begin{objectives}
+Build a point-in-time backtest, avoid data leakage, quantify costs and uncertainty,
+and judge a strategy as a research claim rather than a chart.
+\end{objectives}
+
+\section{The event-driven timeline}
+
+At each decision time:
+
+\begin{enumerate}
+\item ingest only records whose publication timestamp has passed;
+\item update features using training-only transformations;
+\item estimate or update the model;
+\item freeze the target portfolio;
+\item simulate orders in a stated execution window;
+\item apply fills, costs, financing, borrow, and corporate actions;
+\item mark positions and store an immutable audit row.
+\end{enumerate}
+
+Vectorized backtests are fast but can conceal timing. An event-driven ledger makes
+cash, holdings, orders, fills, and value reconcile.
+
+\section{Biases}
+
+Look-ahead bias uses future information directly or through centered filters, revised
+data, global standardization, or same-bar execution. Survivorship bias excludes
+failed securities. Selection bias chooses favorable markets or periods. Data-snooping
+bias chooses a model after examining outcomes. Publication bias hides failures.
+
+Point-in-time universes, delisting returns, publication lags, and a research registry
+are defenses. No statistical correction fully reconstructs undocumented exploration.
+
+\section{Performance measurement}
+
+For periodic excess returns $r_t^e$, estimated Sharpe ratio is
+\[
+\widehat{SR}=\frac{\bar r^e}{s_r}
+\]
+times an annualization factor under a stated frequency. Serial correlation changes
+its standard error and invalidates naive square-root scaling of information.
+
+Other metrics include Sortino ratio, maximum drawdown, Calmar ratio, hit rate,
+skewness, tail ratio, turnover, capacity, beta, factor alpha, and certainty equivalent.
+Choose predeclared metrics aligned with the strategy.
+
+\section{Sharpe uncertainty}
+
+Under iid normal returns, approximate standard error depends on sample size and
+Sharpe itself. Non-normality and serial dependence require robust methods. A
+probabilistic Sharpe ratio compares an observed estimate to a benchmark using
+estimated skew and kurtosis; a deflated Sharpe also adjusts for selection among
+trials.
+
+Block bootstrap resamples consecutive observations to preserve local dependence.
+Stationary bootstrap uses random block lengths. Strategy re-estimation should occur
+inside each bootstrap if model-fitting uncertainty is part of the question.
+
+\section{Costs and financing}
+
+Net return includes gross asset P\&L, spread, commission, impact, borrow fees,
+dividends on shorts, futures variation margin, funding, FX conversion, and tax if in
+scope. Apply costs to trades, not average holdings. Use bid and ask where available.
+
+Sensitivity should vary cost multipliers, execution delay, participation caps, and
+assets under management. A strategy whose conclusion reverses under a small plausible
+cost change is not robust.
+
+\section{Benchmarking and attribution}
+
+Benchmarks include cash, passive market, equal weight, factor-matched portfolios,
+and the previous production model. Attribution can separate allocation, selection,
+timing, factors, carry, convexity, and residual. Attribution is model-dependent and
+must reconcile algebraically to total return.
+
+\section{Decision protocol}
+
+Before looking at the final test:
+
+\begin{itemize}
+\item state hypotheses and directional predictions;
+\item freeze universe, features, estimator, tuning protocol, and costs;
+\item define rejection and economic materiality thresholds;
+\item name stress tests and subgroup analyses;
+\item preserve code and configuration hash.
+\end{itemize}
+
+After the test, report every predeclared result and label new investigations
+exploratory. A negative result with a clear mechanism test is valuable research.
+
+\section{Problems}
+
+\begin{exercise}[Core: timing audit]
+Draw the complete timeline for a monthly accounting signal traded at the next
+month's open. Include fiscal period end, filing, vendor ingestion, signal, and fill.
+\end{exercise}
+\begin{exercise}[Core: ledger]
+Write identities reconciling starting cash, trades, fees, distributions, financing,
+and ending portfolio value.
+\end{exercise}
+\begin{exercise}[Research]
+Reproduce a published factor using point-in-time inputs. Compare gross, quoted-spread,
+and impact-adjusted results, then test on an untouched geography.
+\end{exercise}

@@ -1,0 +1,141 @@
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[
+  paperwidth=7in,
+  paperheight=10in,
+  inner=0.94in,
+  outer=0.84in,
+  top=0.84in,
+  bottom=0.96in,
+  headheight=15pt
+]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,array,longtable,multirow}
+\usepackage{graphicx,float,caption}
+\usepackage{microtype,setspace}
+\usepackage{xcolor,enumitem,fancyhdr}
+\usepackage{listings}
+\usepackage{xurl}
+\usepackage{hyperref}
+
+\definecolor{navy}{HTML}{0B1F33}
+\definecolor{blue}{HTML}{135E96}
+\definecolor{teal}{HTML}{087E8B}
+\definecolor{gold}{HTML}{D6A84B}
+\definecolor{ink}{HTML}{17202A}
+\definecolor{mist}{HTML}{E9F0F5}
+\definecolor{softgray}{HTML}{F4F6F7}
+\definecolor{codegreen}{HTML}{1B6B45}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=teal,
+  citecolor=blue,
+  pdftitle={Quantitative Finance: From Mathematical Foundations to Empirical Research},
+  pdfauthor={Badr Ettousy},
+  pdfsubject={Financial engineering, quantitative finance, econometrics, and risk},
+  pdfkeywords={quantitative finance, stochastic calculus, derivatives, econometrics, portfolio risk}
+}
+
+\setstretch{1.11}
+\setlength{\emergencystretch}{1.5em}
+\setlength{\parindent}{1.25em}
+\setlength{\parskip}{0.15em}
+\raggedbottom
+\setlist[itemize]{leftmargin=1.7em,itemsep=0.2em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=1.9em,itemsep=0.25em,topsep=0.35em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\nouppercase{\leftmark}}
+\fancyhead[R]{\small\sffamily Financial Engineering Lab}
+\fancyfoot[C]{\sffamily\thepage}
+\renewcommand{\headrulewidth}{0.35pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\sffamily\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+\makeatletter
+\renewcommand\chapter{\if@openright\cleardoublepage\else\clearpage\fi
+  \thispagestyle{plain}\global\@topnum\z@\@afterindentfalse\secdef\@chapter\@schapter}
+\def\@makechapterhead#1{\vspace*{18pt}{\parindent\z@\raggedright\normalfont
+  \color{gold}\rule{\textwidth}{1.1pt}\par\vspace{11pt}
+  \ifnum\c@secnumdepth>\m@ne {\sffamily\bfseries\Large\color{blue}\@chapapp\space\thechapter\par\nobreak\vskip 8pt}\fi
+  {\sffamily\bfseries\huge\color{navy}#1\par\nobreak\vskip 25pt}}}
+\def\@makeschapterhead#1{\vspace*{18pt}{\parindent\z@\raggedright\normalfont
+  \color{gold}\rule{\textwidth}{1.1pt}\par\vspace{11pt}
+  {\sffamily\bfseries\huge\color{navy}#1\par\nobreak\vskip 25pt}}}
+\makeatother
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{example}[definition]{Worked example}
+\newtheorem{exercise}[definition]{Exercise}
+\theoremstyle{plain}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{warning}[definition]{Model-risk warning}
+
+\newenvironment{objectives}
+  {\begin{quote}\color{navy}\small\sffamily\textbf{Learning objectives.}\ }
+  {\end{quote}}
+\newenvironment{researchnote}
+  {\begin{quote}\color{teal}\small\sffamily\textbf{Research note.}\ }
+  {\end{quote}}
+\newenvironment{keypoint}
+  {\begin{quote}\color{blue}\small\sffamily\textbf{Key point.}\ }
+  {\end{quote}}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{codegreen},
+  stringstyle=\color{teal},
+  backgroundcolor=\color{softgray},
+  frame=single,
+  rulecolor=\color{mist},
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  aboveskip=0.8em,
+  belowskip=0.8em
+}
+
+\DeclareMathOperator{\E}{\mathbb E}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Corr}{Corr}
+\newcommand{\Prob}{\mathbb P}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\argmax}{arg\,max}
+\DeclareMathOperator{\esssup}{ess\,sup}
+\DeclareMathOperator{\VaR}{VaR}
+\DeclareMathOperator{\ES}{ES}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\logit}{logit}
+\DeclareMathOperator{\plim}{plim}
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\F}{\mathcal F}
+\newcommand{\B}{\mathcal B}
+\newcommand{\dd}{\,\mathrm d}
+\newcommand{\ind}{\mathbf 1}
+\newcommand{\ones}{\bm 1}
+\newcommand{\transpose}{\mathsf T}
+\newcommand{\e}{\mathrm e}
+\newcommand{\given}{\,\middle|\,}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\inner}[2]{\left\langle#1,#2\right\rangle}
+\newcommand{\Rplus}{\mathbb R_{+}}
+\newcommand{\riskfree}{r_f}

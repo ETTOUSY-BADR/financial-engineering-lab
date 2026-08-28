@@ -1,0 +1,12 @@
+Source: FRED constant-maturity Treasury series via fredgraph CSV
+URL: https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS3MO,DGS6MO,DGS1,DGS2,DGS3,DGS5,DGS7,DGS10,DGS20,DGS30
+Series: DGS3MO, DGS6MO, DGS1, DGS2, DGS3, DGS5, DGS7, DGS10, DGS20, DGS30
+Requested start: 1990-01-01
+Complete monthly rows: 395
+First month: 1993-10-31 00:00:00
+Last month: 2026-08-31 00:00:00
+Generated UTC: 2026-08-28T00:47:28.321427+00:00
+Values are constant-maturity par yields in percent, not zero-coupon rates.
+Monthly observations use the last available daily value.
+Treasury changed its official par-curve methodology on 2021-12-06.
+Synthetic fallback validates software only and cannot support market claims.

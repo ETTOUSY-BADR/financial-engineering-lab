@@ -1,12 +1,494 @@
-\chapter{Macroeconomics for markets}
-\section{Intertemporal choice}
-A representative household maximizes $\E_0\sum_{t=0}^{\infty}\beta^t u(c_t)$ subject to $a_{t+1}=(1+r_t)a_t+y_t-c_t$. The Euler equation is $u'(c_t)=\beta(1+r_{t+1})\E_t[u'(c_{t+1})]$. For CRRA utility $u(c)=c^{1-\gamma}/(1-\gamma)$, expected consumption growth is tied to the real short rate and risk aversion.
-\section{IS--Phillips--policy system}
-A compact linearized system is $x_t=\E_tx_{t+1}-\sigma(i_t-\E_t\pi_{t+1}-r_t^n)$ and $\pi_t=\beta\E_t\pi_{t+1}+\kappa x_t+u_t$, with policy $i_t=\rho i_{t-1}+(1-\rho)(\phi_\pi\pi_t+\phi_xx_t)+\varepsilon_t$. The symbols encode the output gap, inflation, nominal rate, natural real rate, and shocks.
-\begin{remark}[Identification]
-A correlation between rates and returns is not automatically a monetary-policy causal effect. Expectations, simultaneous responses, and measurement error must be modeled.
-\end{remark}
-\section{Term structure}
-Under no arbitrage, a zero-coupon bond price is $P(t,T)=\E_t^\mathbb{Q}[e^{-\int_t^T r_s\dd s}]$. Its continuously compounded yield is $y(t,T)=-\log P(t,T)/(T-t)$. Duration approximates price sensitivity: $\Delta P/P\approx-D\,\Delta y+\frac12\mathcal{C}(\Delta y)^2$.
-\section{State-space thinking}
-Latent economic states can be estimated with $x_{t+1}=Ax_t+\eta_{t+1}$ and $y_t=Cx_t+\varepsilon_t$. The Kalman filter is optimal for linear Gaussian systems; otherwise particle or nonlinear filters are needed. Always distinguish a filtered estimate, which uses information through $t$, from a smoothed estimate, which uses future observations.
+\chapter{Intertemporal Macroeconomics}
+
+\begin{objectives}
+Connect national accounts, consumption and saving, growth, and equilibrium to asset
+prices; derive Euler equations and understand where representative-agent models
+succeed and fail.
+\end{objectives}
+
+\section{Stocks, flows, nominal quantities, and real quantities}
+
+Gross domestic product is the market value of final production within an economy
+during a period. The expenditure identity is
+\[
+Y_t=C_t+I_t+G_t+NX_t.
+\]
+It is an accounting identity, not a behavioral equation. Consumption, investment,
+government purchases, and net exports are flows. Wealth, debt, and capital are
+stocks measured at a point in time. A stock evolves through flows and valuation:
+\[
+W_t-W_{t-1}=\text{saving}_t+\text{capital gain}_t+\text{transfers}_t.
+\]
+
+Nominal GDP uses current prices. Real GDP applies a price index or chain-weighted
+volume measure. If $P_t$ is a price index, inflation is
+$\pi_t=\log P_t-\log P_{t-1}$ and the approximate Fisher relation is
+$i_t\approx r_t+\E_t\pi_{t+1}$. Exact gross returns satisfy
+\[
+1+r_t=\frac{1+i_t}{1+\pi_{t+1}}.
+\]
+
+\begin{warning}
+Macro series are revised, seasonally adjusted, sampled at mixed frequencies, and
+released with lags. A backtest using the latest revised history has information that
+was unavailable in real time. Vintage data are required for a genuine forecasting
+experiment.
+\end{warning}
+
+\section{Two-period consumption}
+
+A household with initial wealth $w$, incomes $y_0,y_1$, and gross risk-free return
+$R_f$ solves
+\[
+\max_{c_0,c_1}u(c_0)+\beta u(c_1)
+\quad\text{s.t.}\quad
+c_0+\frac{c_1}{R_f}=w+y_0+\frac{y_1}{R_f}.
+\]
+At an interior solution,
+\[
+u'(c_0)=\beta R_f u'(c_1).
+\]
+The relative price of future consumption is $1/R_f$. A higher rate has a substitution
+effect favoring future consumption and a wealth effect whose sign depends on whether
+the household is a borrower or lender.
+
+\section{Consumption under uncertainty}
+
+In many periods, the agent chooses adapted consumption and a portfolio subject to a
+budget constraint. The asset-specific Euler condition is
+\[
+1=\E_t[M_{t+1}R_{i,t+1}],\qquad
+M_{t+1}=\beta\frac{u'(C_{t+1})}{u'(C_t)}.
+\]
+The random variable $M$ is the stochastic discount factor. It is high in states
+where marginal utility is high, so an asset that pays in bad states is valuable.
+
+For CRRA utility $u(C)=C^{1-\gamma}/(1-\gamma)$,
+\[
+M_{t+1}=\beta\left(\frac{C_{t+1}}{C_t}\right)^{-\gamma}.
+\]
+The risk-free rate satisfies $R_{f,t}^{-1}=\E_t[M_{t+1}]$, while the expected excess
+return obeys
+\[
+\E_t[R_{i,t+1}]-R_{f,t}
+=-\frac{\Cov_t(M_{t+1},R_{i,t+1})}{\E_t[M_{t+1}]}.
+\]
+
+\begin{proof}
+The Euler equation gives
+$1=\E_t[M]\E_t[R_i]+\Cov_t(M,R_i)$.
+For the risk-free asset, $1=R_f\E_t[M]$. Subtract and divide by $\E_t[M]$.
+\end{proof}
+
+This equation is central to macro-finance: expected returns compensate covariance
+with marginal utility, not variance in isolation.
+
+\section{Permanent income and precautionary saving}
+
+With quadratic utility, a constant rate, and certainty-equivalent income, consumption
+is proportional to annuitized total wealth. Under rational expectations, changes in
+consumption reflect news about permanent resources. With concave marginal utility,
+uncertainty adds precautionary saving when $u'''(c)>0$.
+
+\begin{proposition}[Euler inequality under a borrowing constraint]
+If the agent cannot borrow beyond a boundary, the consumption Euler condition
+becomes
+\[
+u'(C_t)\geq\beta R_f\E_t[u'(C_{t+1})],
+\]
+with equality when the constraint does not bind.
+\end{proposition}
+
+Heterogeneous agents matter because constraints bind in bad states and marginal
+propensities to consume vary. A representative agent can match aggregate resource
+constraints while missing distributional channels important for monetary policy and
+risk premia.
+
+\section{Production and growth}
+
+Let output be $Y_t=F(K_t,A_tL_t)$ and capital evolve by
+$K_{t+1}=(1-\delta)K_t+I_t$. With constant returns to scale and Cobb--Douglas
+$F(K,AL)=K^\alpha(AL)^{1-\alpha}$, competitive factor prices satisfy
+\[
+r_t^K=\alpha\frac{Y_t}{K_t},\qquad
+w_t=(1-\alpha)\frac{Y_t}{L_t}.
+\]
+
+In the Solow model per effective worker,
+\[
+k_{t+1}=\frac{s f(k_t)+(1-\delta)k_t}{(1+n)(1+g)}.
+\]
+The steady state equates investment per effective worker with break-even investment.
+The golden-rule stock maximizes steady-state consumption and satisfies
+$f'(k_{\mathrm{GR}})=n+g+\delta$ in the continuous-time approximation.
+
+Growth expectations affect long-duration cash flows, real rates, fiscal capacity,
+and default probabilities. But an observed equity index is not GDP: multinational
+revenue, valuation multiples, leverage, entry and exit, and profit shares separate
+market capitalization from domestic production.
+
+\section{Open-economy parity}
+
+Covered interest parity follows from no arbitrage:
+\[
+\frac{F_{t,T}}{S_t}
+=\frac{B_t^{d}(T)^{-1}}{B_t^{f}(T)^{-1}}
+\]
+under consistent quote conventions, where $S_t$ is domestic currency per unit of
+foreign currency. In one-period notation,
+$F/S=(1+i_d)/(1+i_f)$. Uncovered interest parity replaces the forward rate with an
+expected future spot rate and is a risky equilibrium statement, not arbitrage.
+Cross-currency basis measures deviations after accounting for instruments,
+collateral, funding, and balance-sheet costs.
+
+\section{Problems}
+
+\begin{exercise}[Core: Euler equation]
+Derive the stochastic Euler equation by perturbing consumption and holdings of a
+traded asset. State the transversality condition needed in an infinite-horizon
+problem.
+\end{exercise}
+\begin{exercise}[Core: Fisher relation]
+Derive the exact real return and quantify the approximation error in
+$r\approx i-\pi$ to second order.
+\end{exercise}
+\begin{exercise}[Advanced: habit]
+Let utility depend on surplus consumption $C_t-hC_{t-1}$. Derive marginal utility
+and explain qualitatively how habit can amplify time-varying risk premia.
+\end{exercise}
+
+
+\chapter{Monetary Economics and Macro-Financial Dynamics}
+
+\begin{objectives}
+Derive the canonical New Keynesian system, distinguish policy rules from shocks,
+understand identification around announcements, and connect financial conditions to
+the business cycle.
+\end{objectives}
+
+\section{A three-equation model}
+
+A log-linearized New Keynesian system contains a dynamic IS curve,
+\[
+x_t=\E_tx_{t+1}
+-\frac{1}{\sigma}\left(i_t-\E_t\pi_{t+1}-r_t^n\right),
+\]
+a Phillips curve,
+\[
+\pi_t=\beta\E_t\pi_{t+1}+\kappa x_t+u_t,
+\]
+and a monetary-policy rule,
+\[
+i_t=\rho i_{t-1}+(1-\rho)
+(\bar i+\phi_\pi\pi_t+\phi_xx_t)+\varepsilon_t^m.
+\]
+Here $x_t$ is the output gap, $r_t^n$ the natural real rate, $u_t$ a cost-push shock,
+and $\varepsilon_t^m$ a policy innovation.
+
+The IS equation is an Euler condition: demand falls when the ex ante real rate rises
+relative to its natural level. The Phillips curve comes from forward-looking price
+setting with nominal rigidity. The policy rule is a description of systematic
+behavior plus a residual; it is not the central bank's loss function.
+
+\begin{definition}[Taylor principle]
+In a basic model, the policy rule satisfies the Taylor principle when the nominal
+rate responds more than one-for-one to persistent inflation, $\phi_\pi>1$, so the
+real rate eventually rises.
+\end{definition}
+
+Under familiar restrictions, the principle contributes to local determinacy.
+At the effective lower bound or with fiscal interactions, the result changes.
+
+\section{Present-value solutions and forward guidance}
+
+A stable scalar equation $x_t=a\E_tx_{t+1}+b z_t$ with $0<a<1$ has the forward
+solution
+\[
+x_t=b\sum_{j=0}^\infty a^j\E_tz_{t+j},
+\]
+provided the discounted terminal term vanishes. Asset prices and macro variables
+therefore react to the entire expected policy path, not only today's overnight rate.
+
+Forward guidance can move long rates by changing expected future short rates and
+term premia. Its measured effect depends on whether an announcement changes the
+policy path, economic outlook, uncertainty, or balance-sheet policy.
+
+\section{Central-bank balance sheets and liquidity}
+
+An asset purchase exchanges one consolidated-government liability for another unless
+it changes duration, liquidity, risk bearing, or expected future policy. Candidate
+channels include duration extraction, scarcity, signaling, collateral value, and
+market-functioning support. The central bank balance sheet has assets, reserves,
+currency, capital, and income risk; accounting losses do not map mechanically into
+private-firm insolvency but can affect remittances and political constraints.
+
+Money markets connect the policy rate to secured and unsecured funding. Repo haircuts
+and margins create nonlinear liquidity demand. A dealer financing a position with
+haircut $h$ supplies equity $hP$ and borrows $(1-h)P$; a rising haircut forces
+deleveraging even if the asset's expected cash flow is unchanged.
+
+\section{Financial accelerator}
+
+Borrowers pay an external-finance premium that falls with net worth. A negative
+asset-price shock reduces collateral, tightens borrowing capacity, lowers investment,
+and may cause further price declines. In a reduced-form relation,
+\[
+\text{spread}_t=\psi
+\left(\frac{\text{external finance}_t}{\text{net worth}_t}\right)+\eta_t,
+\qquad \psi'>0.
+\]
+This feedback makes state dependence essential. A linear model near normal times may
+understate crisis amplification.
+
+\section{Policy identification}
+
+Observed policy rates respond endogenously to inflation and growth. Regressing asset
+returns on rate changes mixes the policy response with underlying news. Identification
+strategies include:
+
+\begin{itemize}
+\item narrow intraday windows around scheduled announcements;
+\item high-frequency surprises from rate futures;
+\item sign or narrative restrictions in vector autoregressions;
+\item external instruments correlated with shocks but orthogonal to other news;
+\item local projections tracing dynamic responses.
+\end{itemize}
+
+\begin{definition}[Instrument validity]
+An instrument $Z$ for endogenous treatment $D$ must be relevant,
+$\Cov(Z,D)\neq0$, and excluded from the outcome except through $D$:
+$\E[Z\varepsilon]=0$ in the structural equation.
+\end{definition}
+
+Announcement surprises may combine a pure policy shock and central-bank information
+about the outlook. Joint moves in rates and equities can help separate these
+components, but the decomposition itself rests on sign and timing assumptions.
+
+\section{Inflation, discount rates, and asset classes}
+
+Unexpected inflation redistributes between nominal debtors and creditors. Nominal
+bond prices respond to expected future inflation, real-rate expectations, and risk
+premia. Equity response depends on pricing power, input costs, leverage, and the
+discount-rate channel. Commodities may respond to demand, supply, inventories, and
+currency simultaneously.
+
+Break-even inflation is approximately
+\[
+\begin{aligned}
+y_t^{N}(T)-y_t^{R}(T)
+={}&\E_t^{\mathrm{pricing}}[\bar\pi_{t,T}]\\
+&+\text{inflation risk premium}
++\text{liquidity differential}.
+\end{aligned}
+\]
+It is not a pure survey expectation.
+
+\section{State-space models and the Kalman filter}
+
+Let
+\[
+x_t=Ax_{t-1}+B u_t+\eta_t,\qquad
+y_t=Cx_t+\varepsilon_t,
+\]
+with Gaussian shocks of covariance $Q$ and $R$. Given filtered mean
+$\widehat x_{t-1|t-1}$ and covariance $P_{t-1|t-1}$, prediction is
+\[
+\widehat x_{t|t-1}=A\widehat x_{t-1|t-1}+Bu_t,\quad
+P_{t|t-1}=AP_{t-1|t-1}A^\transpose+Q.
+\]
+The innovation and Kalman gain are
+\[
+v_t=y_t-C\widehat x_{t|t-1},\quad
+S_t=CP_{t|t-1}C^\transpose+R,\quad
+K_t=P_{t|t-1}C^\transpose S_t^{-1},
+\]
+and updating gives
+\[
+\widehat x_{t|t}=\widehat x_{t|t-1}+K_tv_t,\quad
+P_{t|t}=(I-K_tC)P_{t|t-1}.
+\]
+
+\begin{theorem}[Linear-Gaussian filtering]
+Under the stated model, $\widehat x_{t|t}=\E[x_t\mid y_1,\ldots,y_t]$ and
+$P_{t|t}$ is its conditional covariance.
+\end{theorem}
+\begin{proof}
+Induct on $t$. Linear propagation preserves joint Gaussianity. Conditioning a joint
+Gaussian vector on the new observation gives exactly the gain update above.
+\end{proof}
+
+A filtered estimate uses only information available by $t$; a smoothed estimate uses
+future observations. Using a smoother inside a historical trading rule creates
+look-ahead bias.
+
+\section{Problems}
+
+\begin{exercise}[Core: policy rule]
+In the static version of the three-equation model, solve for inflation and the output
+gap after a monetary shock. Track signs and state parameter restrictions.
+\end{exercise}
+\begin{exercise}[Core: Kalman update]
+Derive the scalar Kalman gain and show how it changes when measurement noise tends
+to zero or infinity.
+\end{exercise}
+\begin{exercise}[Advanced: local projection]
+Write a local-projection specification for the response of credit spreads to an
+instrumented policy surprise. State the timing, fixed effects, and standard-error
+choices.
+\end{exercise}
+
+
+\chapter{Yield Curves, Macro Factors, and Regimes}
+
+\begin{objectives}
+Read a yield curve, decompose nominal rates, fit parsimonious curves, understand
+expectations and term premia, and build macro-financial regime models without
+look-ahead bias.
+\end{objectives}
+
+\section{Discount factors, spot rates, and forwards}
+
+The time-$t$ price of one unit at $T$ is $P(t,T)$. With continuously compounded
+zero rate $y(t,T)$,
+\[
+P(t,T)=\e^{-y(t,T)(T-t)}.
+\]
+The instantaneous forward rate satisfies
+\[
+f(t,T)=-\frac{\partial}{\partial T}\log P(t,T),\qquad
+P(t,T)=\exp\left(-\int_t^Tf(t,u)\dd u\right).
+\]
+For discretely compounded market instruments, day count, settlement, calendars, and
+coupon conventions must be handled before comparing quoted yields.
+
+\section{Expectations hypothesis and term premia}
+
+An $n$-period yield can be decomposed schematically as
+\[
+y_t^{(n)}
+=\frac1n\sum_{j=0}^{n-1}\E_t r_{t+j}
++TP_t^{(n)}.
+\]
+The first term is an expected path of short rates; the term premium compensates risk,
+duration supply, preferred habitat, and model-specific covariance. Neither component
+is observed directly. Different models can fit the same yields and disagree about
+the decomposition.
+
+Under pure expectations plus constant premium, a steep curve predicts rising short
+rates. Empirically, forward rates also vary with risk premia. Regressions of excess
+bond returns on forward-rate combinations test this tension but are sensitive to
+persistence and small samples.
+
+\section{Nelson--Siegel representation}
+
+At maturity $\tau$, the Nelson--Siegel yield is
+\[
+y_t(\tau)=\beta_{0t}
++\beta_{1t}\frac{1-\e^{-\lambda\tau}}{\lambda\tau}
++\beta_{2t}\left(
+\frac{1-\e^{-\lambda\tau}}{\lambda\tau}-\e^{-\lambda\tau}
+\right).
+\]
+The loadings motivate level, slope, and curvature interpretations. For fixed
+$\lambda$, factor estimates are linear least squares. Choosing $\lambda$ by minimizing
+cross-sectional error is nonlinear and can be unstable on sparse curves.
+
+\begin{example}[Limiting loadings]
+As $\tau\downarrow0$, the slope loading tends to $1$ and the curvature loading to
+$0$. As $\tau\to\infty$, both tend to $0$. Thus $\beta_0$ dominates long maturity,
+$\beta_1$ moves the short end, and $\beta_2$ produces a hump.
+\end{example}
+
+Dynamic Nelson--Siegel models the factors as a vector autoregression or state-space
+process. Measurement error at each maturity distinguishes curve-fitting noise from
+factor dynamics.
+
+\section{Affine term-structure models}
+
+Let state $X_t$ follow an affine diffusion under $\Q$:
+\[
+\dd X_t=K^\Q(\theta^\Q-X_t)\dd t+\Sigma(X_t)\dd W_t^\Q,
+\qquad r_t=\delta_0+\delta_1^\transpose X_t.
+\]
+Under affine regularity, the zero-coupon price is exponential affine:
+\[
+P(t,T)=\exp(A(\tau)-B(\tau)^\transpose X_t).
+\]
+Substitution into the pricing PDE produces Riccati ordinary differential equations
+for $A$ and $B$. A separate physical-measure drift determines forecasting dynamics
+and market prices of risk.
+
+\begin{example}[Vasicek bond coefficients]
+For $\dd r=\kappa(\theta-r)\dd t+\sigma\dd W^\Q$,
+\[
+P(t,T)=A(\tau)\e^{-B(\tau)r_t},\qquad
+B(\tau)=\frac{1-\e^{-\kappa\tau}}{\kappa},
+\]
+with
+\[
+\log A(\tau)=
+\left(\theta-\frac{\sigma^2}{2\kappa^2}\right)(B(\tau)-\tau)
+-\frac{\sigma^2B(\tau)^2}{4\kappa}.
+\]
+Gaussian rates make the model tractable but allow negative rates.
+\end{example}
+
+\section{Macro regimes}
+
+A discrete Markov regime $S_t\in\{1,\ldots,K\}$ has transition probabilities
+$p_{ij}=\Prob(S_t=j\mid S_{t-1}=i)$. Conditional observations can have
+regime-dependent mean and covariance:
+\[
+y_t\mid S_t=k\sim N(\mu_k,\Sigma_k).
+\]
+The Hamilton filter alternates prediction
+$\xi_{t|t-1}=P^\transpose\xi_{t-1|t-1}$ and Bayes updating using the conditional
+density. Smoothed probabilities use the entire sample and are inappropriate as
+real-time signals.
+
+\begin{definition}[Expected regime duration]
+For a time-homogeneous Markov chain, the duration in regime $i$ is geometrically
+distributed with mean $1/(1-p_{ii})$.
+\end{definition}
+
+Regime labels are unidentified up to permutation. More seriously, a finite mixture
+can use extra states to absorb outliers rather than discover economic regimes.
+Economic interpretation should follow estimation and be checked across vintages,
+initializations, and alternative emission distributions.
+
+\section{A disciplined macro-finance dashboard}
+
+A research dashboard can combine:
+
+\begin{itemize}
+\item growth: industrial production, payrolls, claims, and activity surveys;
+\item inflation: consumer prices, producer prices, wages, and expectations;
+\item policy: overnight rate, expected path, and balance-sheet measures;
+\item curve: short rate, two--ten slope, forward rates, and term-premium estimate;
+\item financial conditions: credit spreads, equity volatility, dollar, and liquidity;
+\item vintages: the actual release available on each decision date.
+\end{itemize}
+
+Transformations must match the question. Year-over-year growth is smooth but delayed;
+monthly annualized growth is timely but noisy. Standardizing over a full sample leaks
+future moments. A live procedure uses expanding or rolling estimates.
+
+\section{Problems}
+
+\begin{exercise}[Core: forwards]
+Starting from discount factors, derive a forward rate between $T_1$ and $T_2$ under
+continuous and annual compounding.
+\end{exercise}
+\begin{exercise}[Core: Nelson--Siegel]
+For fixed $\lambda$, express cross-sectional factor estimation in matrix form.
+Describe how you would weight maturities when quote noise differs.
+\end{exercise}
+\begin{exercise}[Advanced: regime filtering]
+Derive the two-state Hamilton filter and log-likelihood. Explain why filtered and
+smoothed performance must be reported separately.
+\end{exercise}
+\begin{exercise}[Research]
+Build an expanding-window recession-probability model using only vintage-available
+predictors. Compare calibration, ROC area, and log score against a constant
+probability benchmark.
+\end{exercise}

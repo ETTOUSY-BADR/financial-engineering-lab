@@ -1,16 +1,638 @@
-\chapter{Microeconometrics and empirical finance}
-\section{Potential outcomes and causal estimands}
-For unit $i$, let $Y_i(1),Y_i(0)$ be potential outcomes. The average treatment effect is $\tau=\E[Y(1)-Y(0)]$. Observed data reveal only $Y_i=D_iY_i(1)+(1-D_i)Y_i(0)$, so causal identification requires assumptions.
-\begin{assumption}[Unconfoundedness]
-$(Y(1),Y(0))\perp D\mid X$, with overlap $0<\Prob(D=1\mid X=x)<1$ on the support.
+\chapter{Statistical Identification and Linear Models}
+
+\begin{objectives}
+Distinguish an estimand from an estimator, derive least squares and its sampling
+properties, diagnose endogeneity, and use uncertainty estimates appropriate to
+financial data.
+\end{objectives}
+
+\section{From a question to an estimand}
+
+An empirical project needs four separate objects:
+
+\begin{enumerate}
+\item a population or data-generating process;
+\item an estimand, such as a conditional mean, causal effect, or risk functional;
+\item an estimator computed from a sample;
+\item a decision rule that uses the estimate.
+\end{enumerate}
+
+Prediction asks for a function that performs well under a specified loss on new
+data. Structural estimation asks for parameters with economic meaning under a
+model. Causal inference asks how an outcome changes under an intervention. The same
+regression code can be used for all three, but its coefficient does not inherit an
+interpretation from the software.
+
+\begin{definition}[Identification]
+A parameter $\theta$ is identified by the distribution of observables $P$ if
+$P_{\theta_1}=P_{\theta_2}$ implies $\theta_1=\theta_2$. It is set identified when
+the observables restrict it only to a non-singleton set.
+\end{definition}
+
+Identification is a population property; precision is a sample property. Infinite
+data cannot identify a parameter that two observationally equivalent models map to
+different values.
+
+\section{Population regression}
+
+The best linear predictor of scalar $Y$ from vector $X$ solves
+\[
+\beta^\star=\argmin_b\E[(Y-X^\transpose b)^2].
+\]
+If $\E[XX^\transpose]$ is nonsingular,
+\[
+\beta^\star=\E[XX^\transpose]^{-1}\E[XY].
+\]
+The projection error $u=Y-X^\transpose\beta^\star$ satisfies
+$\E[Xu]=0$ by construction. This orthogonality does not imply
+$\E[u\mid X]=0$ or causality.
+
+\section{Ordinary least squares}
+
+For $y=X\beta+\varepsilon$, OLS is
+\[
+\widehat\beta=(X^\transpose X)^{-1}X^\transpose y
+=\beta+(X^\transpose X)^{-1}X^\transpose\varepsilon.
+\]
+
+\begin{assumption}[Classical conditional model]
+$X$ has full column rank, $\E[\varepsilon\mid X]=0$, and
+$\Var(\varepsilon\mid X)=\sigma^2I$.
 \end{assumption}
-Under this assumption, regression adjustment or inverse-probability weighting can identify $\tau$. Financial examples include evaluating a policy announcement or a portfolio signal, but time dependence and interference require care.
-\section{Time series and returns}
-The AR(1) model $r_t=c+\phi r_{t-1}+\varepsilon_t$ is covariance stationary when $|\phi|<1$. For volatility, GARCH(1,1) specifies $\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2+\beta\sigma_{t-1}^2$, with $\omega>0$, $\alpha,\beta\geq0$, and $\alpha+\beta<1$ for finite unconditional variance.
-\section{Regression discipline}
-For $y=X\beta+\varepsilon$, OLS is unbiased conditional on $X$ if $\E[\varepsilon\mid X]=0$. Heteroskedasticity and autocorrelation invalidate naive standard errors; use robust or HAC estimators and report effective sample size. Multiple testing, data snooping, survivorship bias, and look-ahead bias are first-order threats in strategy research.
-\begin{theorem}[Law of large numbers, informal]
-For stationary ergodic observations with finite first moment, sample averages converge almost surely to population expectations. Dependence does not disappear by pretending observations are iid; the assumptions determine the limit theory.
+
+\begin{theorem}[Gauss--Markov]
+Under the classical conditional model, OLS is the best linear unbiased estimator:
+for any linear unbiased $\widetilde\beta=Ay$,
+\[
+\Var(\widetilde\beta\mid X)-\Var(\widehat\beta\mid X)\succeq0.
+\]
 \end{theorem}
-\section{Validation}
-Use expanding or rolling walk-forward splits. A signal is credible only after transaction costs, turnover, liquidity, missingness, and parameter instability are included. Bootstrap procedures should preserve relevant dependence, for example via moving blocks rather than independently resampling daily returns.
+\begin{proof}
+Unbiasedness requires $AX=I$. Write
+$A=(X^\transpose X)^{-1}X^\transpose+D$, so $DX=0$. Conditional variance is
+$\sigma^2AA^\transpose
+=\sigma^2[(X^\transpose X)^{-1}+DD^\transpose]$ because cross terms vanish.
+\end{proof}
+
+Normality is unnecessary for Gauss--Markov. It gives exact finite-sample
+$t$ and $F$ distributions when combined with the other assumptions.
+
+\section{Large-sample inference}
+
+Under weak conditions,
+\[
+\sqrt n(\widehat\beta-\beta^\star)
+\Rightarrow N(0,Q^{-1}\Omega Q^{-1}),
+\]
+where $Q=\E[X_iX_i^\transpose]$ and
+$\Omega=\E[X_iX_i^\transpose u_i^2]$ for independent heteroskedastic observations.
+The sandwich estimator replaces expectations with sample analogues.
+
+For time series, serial correlation adds long-run covariances:
+\[
+\Omega=\sum_{h=-\infty}^{\infty}
+\E[X_tu_tu_{t-h}X_{t-h}^\transpose].
+\]
+Newey--West HAC estimation truncates and weights sample autocovariances. Bandwidth
+choice trades bias against variance; HAC does not rescue a misspecified conditional
+mean or overlapping-label leakage.
+
+\begin{warning}
+Daily observations do not guarantee daily independent information. Persistent
+predictors, overlapping multi-day returns, common shocks, and clustered trades can
+reduce the effective sample far below the row count.
+\end{warning}
+
+\section{Omitted variables and measurement error}
+
+Suppose the true model is $Y=\beta X+\gamma Z+u$, but $Z$ is omitted. In a scalar
+regression,
+\[
+\plim\widehat\beta_{\mathrm{short}}
+=\beta+\gamma\frac{\Cov(X,Z)}{\Var(X)}.
+\]
+The sign depends on both the effect of $Z$ and its association with $X$.
+
+Classical measurement error $X^\ast=X+v$, with $v$ independent, creates attenuation:
+\[
+\plim\widehat\beta
+=\beta\frac{\Var(X)}{\Var(X)+\Var(v)}.
+\]
+Nonclassical financial measurement error---stale prices, bid--ask bounce, imputed
+fundamentals---can produce any direction of bias.
+
+\section{Instrumental variables}
+
+For structural equation $Y=D\beta+X^\transpose\gamma+u$, an instrument $Z$ supplies
+variation in $D$ that is orthogonal to $u$. With one centered instrument and
+treatment,
+\[
+\widehat\beta_{\mathrm{IV}}=\frac{\widehat\Cov(Z,Y)}
+{\widehat\Cov(Z,D)}.
+\]
+
+\begin{proposition}[Two-stage least squares]
+With instrument matrix $Z$ including exogenous controls,
+\[
+\widehat\beta_{\mathrm{2SLS}}
+=(X^\transpose P_ZX)^{-1}X^\transpose P_Zy.
+\]
+It equals OLS of $y$ on the fitted values only with the correct second-stage
+standard errors based on the original structural residuals.
+\end{proposition}
+
+Weak instruments create biased, nonnormal finite-sample inference. Report first-stage
+strength, weak-IV robust confidence sets, and a substantive argument for exclusion.
+
+\section{Hypothesis testing and multiplicity}
+
+A $p$-value is the probability, under the null and the test's assumptions, of a
+statistic at least as extreme as observed. It is not the probability the null is
+true. A confidence interval is a procedure with repeated-sample coverage; it is not
+a posterior probability interval unless a Bayesian model supplies that meaning.
+
+Testing hundreds of signals selects noise. Family-wise error control targets any
+false rejection; false discovery rate targets the expected proportion among
+discoveries. In research portfolios, dependence and adaptive specification search
+complicate both. A held-out test set and a complete research log are more credible
+than correcting only the final table.
+
+\section{Problems}
+
+\begin{exercise}[Core: projection versus causality]
+Construct a population in which the best linear predictor coefficient is nonzero
+but the causal effect of $X$ on $Y$ is zero.
+\end{exercise}
+\begin{exercise}[Core: robust variance]
+Derive the heteroskedastic sandwich covariance from a central limit theorem for
+$n^{-1/2}\sum_iX_iu_i$.
+\end{exercise}
+\begin{exercise}[Advanced: weak instruments]
+Analyze the IV ratio when $\Cov(Z,D)$ approaches zero at rate $n^{-1/2}$. Explain
+why ordinary normal approximations fail.
+\end{exercise}
+
+
+\chapter{Time-Series Econometrics}
+
+\begin{objectives}
+Model stationarity, persistence, trends, cointegration, and multivariate dynamics;
+construct genuine forecasts; and understand the effect of parameter instability.
+\end{objectives}
+
+\section{Stationarity, ergodicity, and autocovariance}
+
+A process is strictly stationary if every finite-dimensional distribution is
+invariant to a common time shift. It is covariance stationary if mean is constant,
+variance finite and constant, and covariance depends only on lag:
+$\gamma(h)=\Cov(X_t,X_{t-h})$. Ergodicity ensures time averages reveal population
+features.
+
+The autocorrelation is $\rho(h)=\gamma(h)/\gamma(0)$. The spectral density
+\[
+f(\omega)=\frac{1}{2\pi}\sum_{h=-\infty}^{\infty}
+\gamma(h)\e^{-i\omega h}
+\]
+decomposes variance by frequency, with
+$\gamma(h)=\int_{-\pi}^{\pi}\e^{i\omega h}f(\omega)\dd\omega$.
+
+\section{ARMA models}
+
+Using lag operator $L X_t=X_{t-1}$, an ARMA$(p,q)$ is
+\[
+\phi(L)X_t=c+\theta(L)\varepsilon_t.
+\]
+Causality requires roots of $\phi(z)=0$ outside the unit circle; invertibility
+requires the same for $\theta(z)$. These conditions yield stable infinite-order
+representations.
+
+\begin{example}[AR(1)]
+For $X_t=c+\phi X_{t-1}+\varepsilon_t$ with $\abs{\phi}<1$,
+\[
+\E[X_t]=\frac{c}{1-\phi},\quad
+\Var(X_t)=\frac{\sigma_\varepsilon^2}{1-\phi^2},\quad
+\rho(h)=\phi^{\abs h}.
+\]
+The $h$-step forecast is
+\[
+\widehat X_{t+h|t}
+=\bar X+\phi^h(X_t-\bar X),
+\]
+and its error variance is
+$\sigma_\varepsilon^2\sum_{j=0}^{h-1}\phi^{2j}$.
+\end{example}
+
+Information criteria balance fit and dimension:
+$\mathrm{AIC}=-2\ell+2k$ and
+$\mathrm{BIC}=-2\ell+k\log n$. Selecting a model and reporting standard inference as
+if it were fixed understates uncertainty.
+
+\section{Unit roots and spurious regression}
+
+When $X_t=X_{t-1}+\varepsilon_t$, shocks have permanent effects and variance grows
+with $t$. Regressing one unrelated random walk on another can produce high $R^2$ and
+apparently significant coefficients.
+
+The augmented Dickey--Fuller regression is
+\[
+\Delta X_t=\alpha+\delta t+\gamma X_{t-1}
++\sum_{j=1}^p\psi_j\Delta X_{t-j}+u_t.
+\]
+The null $\gamma=0$ has a nonstandard distribution. Failure to reject is not proof
+of a unit root, and deterministic terms materially change critical values.
+
+Near-unit-root predictors cause severe finite-sample bias in return-predictability
+regressions, particularly when innovations to returns and predictors are correlated.
+
+\section{Cointegration and error correction}
+
+If nonstationary $X_t$ and $Y_t$ have a stationary linear combination
+$Y_t-\beta X_t$, they are cointegrated. The error-correction model
+\[
+\Delta Y_t=\alpha(Y_{t-1}-\beta X_{t-1})
++\Gamma\Delta X_t+\varepsilon_t
+\]
+combines long-run equilibrium and short-run adjustment. Cointegration is not a
+guarantee of profitable convergence trading; the relation can break, the error can
+be untradeable, and financing horizons can be shorter than mean reversion.
+
+\section{Vector autoregressions}
+
+A VAR$(p)$ is
+\[
+Y_t=c+A_1Y_{t-1}+\cdots+A_pY_{t-p}+u_t.
+\]
+The reduced-form covariance $\Sigma_u$ contains contemporaneously correlated shocks.
+Impulse responses require identifying structural shocks
+$u_t=B\varepsilon_t$. Since $BB^\transpose=\Sigma_u$ does not uniquely determine
+$B$, recursive ordering, long-run restrictions, signs, heteroskedasticity, or
+external instruments supply additional assumptions.
+
+Local projections estimate each horizon separately:
+\[
+Y_{t+h}-Y_{t-1}=\alpha_h+\beta_h\widehat\varepsilon_t+
+\Gamma_h^\transpose W_t+u_{t+h}.
+\]
+They are flexible but can be noisy; VARs impose more dynamic structure.
+
+\section{Forecast evaluation}
+
+A valid forecast records information available at origin $t$, trains only through
+$t$, and predicts a target defined after $t$. For point forecast $\widehat y_t$, loss
+might be squared error, absolute error, quantile loss, or economic utility. Match the
+loss to the decision.
+
+The Diebold--Mariano comparison uses loss differential
+$d_t=L(e_{1t})-L(e_{2t})$ and tests $\E[d_t]=0$ with a long-run variance estimate.
+Nested models and estimated parameters can require adjusted inference.
+
+Directional accuracy is not enough if gains and losses are asymmetric. An economic
+backtest must define position timing, costs, leverage, financing, and benchmark. A
+forecast can improve mean squared error yet destroy utility, or vice versa.
+
+\section{Structural breaks and rolling models}
+
+Parameter instability can be abrupt or gradual. A Chow test assumes a known break;
+supremum tests search unknown break dates; CUSUM uses recursive residuals. Rolling
+windows adapt but discard information. Expanding windows stabilize estimates but
+adapt slowly.
+
+\begin{definition}[Pseudo-out-of-sample experiment]
+Choose an initial training endpoint $T_0$. For each $t\geq T_0$, estimate the entire
+pipeline using data available at $t$, issue a forecast, advance time, and never
+revise the stored prediction after the outcome arrives.
+\end{definition}
+
+\section{Problems}
+
+\begin{exercise}[Core: AR forecast]
+Derive the AR(1) $h$-step forecast-error variance and its limit as $h\to\infty$.
+\end{exercise}
+\begin{exercise}[Core: cointegration]
+Show that if $X_t$ is a random walk and $Y_t=\beta X_t+u_t$ with stationary $u_t$,
+then $(Y_t,X_t)$ are cointegrated. Derive an error-correction representation.
+\end{exercise}
+\begin{exercise}[Advanced: real-time design]
+Write pseudocode for a pseudo-out-of-sample forecast with monthly predictors released
+on different dates and a daily trading target.
+\end{exercise}
+
+
+\chapter{Volatility, Dependence, and Extreme Risk}
+
+\begin{objectives}
+Estimate conditional variance, distinguish realized from implied volatility, model
+heavy tails and multivariate dependence, and use extreme-value methods with honest
+uncertainty.
+\end{objectives}
+
+\section{Volatility as a conditional object}
+
+For return $r_t=\mu_t+\varepsilon_t$, conditional variance is
+$h_t=\Var(r_t\mid\F_{t-1})$. It is latent. Squared return is a noisy ex post proxy;
+high-frequency realized variance estimates integrated variance under market
+microstructure conditions.
+
+The ARCH$(q)$ model is
+\[
+h_t=\omega+\sum_{i=1}^q\alpha_i\varepsilon_{t-i}^2.
+\]
+GARCH$(1,1)$ is
+\[
+h_t=\omega+\alpha\varepsilon_{t-1}^2+\beta h_{t-1},
+\qquad \omega>0,\ \alpha,\beta\geq0.
+\]
+If $\alpha+\beta<1$, unconditional variance is
+$\omega/(1-\alpha-\beta)$ under the standard innovation assumptions.
+
+\begin{proposition}[GARCH forecast]
+Let $\bar h=\omega/(1-\alpha-\beta)$. Then
+\[
+\E_t[h_{t+k}]=\bar h+(\alpha+\beta)^{k-1}
+(\E_t[h_{t+1}]-\bar h).
+\]
+\end{proposition}
+\begin{proof}
+Take conditional expectations of the recursion and use
+$\E_t[\varepsilon_{t+j}^2]=\E_t[h_{t+j}]$. Iterate the affine difference equation.
+\end{proof}
+
+When $\alpha+\beta$ is near one, volatility shocks decay slowly. Gaussian
+quasi-maximum likelihood can consistently estimate variance dynamics under certain
+non-Gaussian innovations, but robust standard errors are required.
+
+\section{Asymmetry and stochastic volatility}
+
+Equity volatility often rises more after negative returns than positive returns.
+GJR-GARCH adds
+$\gamma\ind_{\{\varepsilon_{t-1}<0\}}\varepsilon_{t-1}^2$. EGARCH models log
+variance and removes positivity constraints.
+
+A stochastic-volatility model is
+\[
+r_t=\mu+\e^{h_t/2}z_t,\qquad
+h_t=\omega+\phi(h_{t-1}-\omega)+\sigma_h\eta_t,
+\]
+possibly with $\Corr(z_t,\eta_t)=\rho$ for leverage. Here volatility has its own
+innovation and requires filtering or simulation-based inference.
+
+\section{Realized variation}
+
+For log price semimartingale
+$\dd p_t=\mu_t\dd t+\sigma_t\dd W_t+\dd J_t$, increasingly fine intraday returns
+satisfy
+\[
+RV_t=\sum_{j=1}^m r_{t,j}^2
+\longrightarrow
+\int_{t-1}^t\sigma_s^2\dd s+\sum_{t-1<s\leq t}(\Delta p_s)^2.
+\]
+At ultra-high frequency, bid--ask bounce, discreteness, and asynchronous timestamps
+create bias. Sampling, subsampling, realized kernels, and pre-averaging address
+different noise structures.
+
+\section{Implied volatility}
+
+Implied volatility is the value $\widehat\sigma$ that equates an option pricing
+formula to a market quote. It is a transformed price under a model, not a direct
+estimate of future physical volatility. Across strikes and maturities it forms a
+surface. Absence of static arbitrage imposes monotonicity and convexity in strike and
+calendar consistency.
+
+The variance risk premium is often measured as a risk-neutral expected variance
+proxy minus subsequent realized variance. Interpretation depends on horizon, jump
+terms, discretization, and the physical forecast used.
+
+\section{Multivariate volatility}
+
+The exponentially weighted covariance recursion
+\[
+\Sigma_t=\lambda\Sigma_{t-1}
++(1-\lambda)r_{t-1}r_{t-1}^\transpose
+\]
+is simple and remains positive semidefinite. It imposes one decay parameter.
+
+Dynamic conditional correlation separates univariate conditional standard
+deviations $D_t$ from correlation:
+$H_t=D_tR_tD_t$. Factor stochastic volatility reduces dimension. Any covariance
+forecast should be evaluated through portfolio-relevant losses, not only elementwise
+fit.
+
+\section{Extreme-value theory}
+
+For a high threshold $u$, peaks-over-threshold theory approximates excesses
+$Y=X-u\mid X>u$ by a generalized Pareto distribution
+\[
+G_{\xi,\beta}(y)=
+1-\left(1+\xi\frac y\beta\right)^{-1/\xi},
+\]
+on the support $1+\xi y/\beta>0$. Shape $\xi>0$ indicates heavy polynomial tails;
+$\xi=0$ is the exponential limit.
+
+If threshold exceedance probability is $\zeta_u$, the high quantile estimate is
+\[
+q_p=u+\frac{\beta}{\xi}
+\left[\left(\frac{1-p}{\zeta_u}\right)^{-\xi}-1\right].
+\]
+Threshold choice trades bias against variance. Dependence requires declustering or
+an extremal-index adjustment. Extrapolation far beyond the observed tail is
+mathematically possible and statistically fragile.
+
+\section{Copulas and stress dependence}
+
+For a Student copula with correlation $\rho$ and degrees of freedom $\nu$, symmetric
+tail dependence is
+\[
+\lambda=2t_{\nu+1}\left(
+-\sqrt{\frac{(\nu+1)(1-\rho)}{1+\rho}}
+\right).
+\]
+Even a flexible copula assumes that fitted dependence persists into the stress being
+modeled. Scenario analysis should therefore supplement distributional estimation.
+
+\section{Backtesting risk forecasts}
+
+For VaR level $\alpha$, exception indicator
+$I_t=\ind_{\{L_t>\widehat{\VaR}_{\alpha,t}\}}$ should have conditional mean
+$1-\alpha$ under a correct model. Unconditional coverage checks frequency;
+independence tests clustering; conditional coverage combines them. Expected
+Shortfall backtests require joint identification with VaR or suitable scoring
+functions.
+
+\begin{warning}
+A model can pass a low-power backtest and still be dangerous. Passing means the
+sample did not reject a specified property, not that the full tail law is correct.
+\end{warning}
+
+\section{Problems}
+
+\begin{exercise}[Core: GARCH half-life]
+Show that the half-life of a variance shock is
+$\log(1/2)/\log(\alpha+\beta)$. Compute it for persistence $0.98$.
+\end{exercise}
+\begin{exercise}[Core: realized variance]
+Explain why sampling more frequently can increase rather than decrease error in the
+presence of bid--ask bounce.
+\end{exercise}
+\begin{exercise}[Advanced: EVT]
+Derive Expected Shortfall for the generalized Pareto tail when $\xi<1$. Identify the
+condition for a finite variance.
+\end{exercise}
+
+
+\chapter{Causal Inference, Panels, and Machine Learning}
+
+\begin{objectives}
+Define causal estimands with potential outcomes, derive major identification
+strategies, use panel data correctly, and integrate machine learning without
+confusing predictive fit with causal evidence.
+\end{objectives}
+
+\section{Potential outcomes}
+
+Let $Y_i(1)$ and $Y_i(0)$ denote outcomes under treatment and control. Observed
+outcome is
+\[
+Y_i=D_iY_i(1)+(1-D_i)Y_i(0).
+\]
+The average treatment effect is
+$\tau=\E[Y(1)-Y(0)]$; the average effect on treated units conditions on $D=1$.
+Only one potential outcome is observed for each unit, the fundamental missing-data
+problem.
+
+\begin{assumption}[Conditional ignorability and overlap]
+\[
+(Y(1),Y(0))\perp D\mid X,\qquad
+0<e(X)=\Prob(D=1\mid X)<1.
+\]
+\end{assumption}
+
+Then
+\[
+\tau=\E[\E(Y\mid D=1,X)-\E(Y\mid D=0,X)]
+\]
+and also admits inverse-propensity weighting.
+
+\begin{proposition}[Doubly robust moment]
+Let $m_d(X)=\E[Y\mid D=d,X]$. The score
+\[
+\psi=
+m_1(X)-m_0(X)
++\frac{D(Y-m_1(X))}{e(X)}
+-\frac{(1-D)(Y-m_0(X))}{1-e(X)}
+\]
+has expectation $\tau$ if either the outcome models are correct or the propensity
+model is correct.
+\end{proposition}
+
+Overlap is substantive. Extreme propensity weights signal that the data contain
+little comparable counterfactual information.
+
+\section{Difference in differences}
+
+With treated and control groups before and after an intervention, the estimator is
+\[
+\widehat\tau_{\mathrm{DiD}}
+=(\bar Y_{T,\mathrm{post}}-\bar Y_{T,\mathrm{pre}})
+-(\bar Y_{C,\mathrm{post}}-\bar Y_{C,\mathrm{pre}}).
+\]
+Identification requires parallel untreated trends, not merely similar pre-period
+levels. Event studies estimate dynamic leads and lags, but pretrend tests may have
+low power and treatment-effect heterogeneity complicates two-way fixed effects.
+
+\section{Regression discontinuity}
+
+If treatment changes discontinuously at running-variable cutoff $c$ while untreated
+potential outcomes vary smoothly,
+\[
+\tau_{\mathrm{RD}}=
+\lim_{x\downarrow c}\E[Y\mid X=x]
+-\lim_{x\uparrow c}\E[Y\mid X=x].
+\]
+Local polynomials, bandwidth sensitivity, density checks, and covariate balance are
+essential. The effect is local to units near the cutoff.
+
+\section{Panel data}
+
+The fixed-effects model
+\[
+y_{it}=\alpha_i+\lambda_t+x_{it}^\transpose\beta+u_{it}
+\]
+uses within-unit variation while absorbing time-invariant unit heterogeneity and
+common date shocks. It does not absorb time-varying confounders. Standard errors
+should cluster at the level of treatment assignment or dependence; two-way
+clustering may be necessary.
+
+Dynamic panels with lagged outcomes and short time dimension suffer Nickell bias.
+Difference and system GMM use internal instruments, but instrument proliferation can
+overfit endogenous variables and weaken specification tests.
+
+\section{Prediction with regularization}
+
+Ridge regression minimizes
+\[
+\frac1n\sum_i(y_i-x_i^\transpose\beta)^2+\lambda\norm{\beta}_2^2,
+\]
+while lasso uses $\lambda\norm{\beta}_1$. Lasso can set coefficients exactly to zero.
+Elastic net combines both. Standardization must be estimated within each training
+fold.
+
+For a tree, recursive partitions approximate nonlinear interactions. Random forests
+average decorrelated trees; gradient boosting fits weak learners sequentially to
+loss gradients. These methods estimate predictive functions, not automatically
+structural mechanisms.
+
+\section{Cross-validation for dependent data}
+
+Random folds leak future regimes into the past. Financial validation should respect
+time. Walk-forward validation trains before validation. When labels overlap, purge
+training observations whose outcome windows intersect validation, and use an
+embargo around fold boundaries if feature construction transmits nearby information.
+
+Hyperparameters are part of the fitted model. The final test set must be untouched
+by feature choice, tuning, threshold selection, and model comparison.
+
+\section{Double machine learning}
+
+For partially linear model
+\[
+Y=\theta D+g(X)+U,\qquad D=m(X)+V,
+\]
+an orthogonal moment is
+\[
+\E[(D-m(X))(Y-g(X)-\theta(D-m(X)))]=0.
+\]
+Cross-fitting estimates nuisance functions on other folds. Orthogonality makes the
+target less sensitive, to first order, to nuisance estimation errors under rate and
+regularity conditions.
+
+\section{Model interpretation and uncertainty}
+
+Permutation importance can be distorted by correlated predictors. Partial
+dependence averages over possibly unrealistic feature combinations. Shapley-based
+explanations allocate a model's prediction under a specified background
+distribution; they are not causal effects.
+
+Uncertainty includes sampling variation, tuning, feature discovery, nonstationarity,
+and decision costs. A single bootstrap around a fixed final model captures only part
+of this stack. Nested resampling or a transparent separation of confirmatory and
+exploratory results is preferable.
+
+\section{Problems}
+
+\begin{exercise}[Core: IPW]
+Prove identification of the ATE by inverse-propensity weighting under ignorability
+and overlap.
+\end{exercise}
+\begin{exercise}[Core: fixed effects]
+Derive the within transformation and explain why a time-invariant regressor cannot
+be separately estimated with unit fixed effects.
+\end{exercise}
+\begin{exercise}[Advanced: orthogonality]
+Differentiate the double-machine-learning moment with respect to perturbations of
+$m$ and $g$ at their true values and verify Neyman orthogonality.
+\end{exercise}
+\begin{exercise}[Research]
+Design a study of the effect of an index inclusion on liquidity. Specify the
+estimand, treatment timing, plausible control group, standard errors, and threats
+from anticipation.
+\end{exercise}

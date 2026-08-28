@@ -1,0 +1,12 @@
+Source: Kenneth R. French Data Library monthly research factors
+Five-factor URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_CSV.zip
+Momentum URL: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_CSV.zip
+Rows: 756
+First month: 1963-07-31 00:00:00
+Last month: 2026-06-30 00:00:00
+Generated UTC: 2026-08-28T00:53:40.902988+00:00
+Input percentage returns are converted to decimal returns.
+French-library methodology and CRSP input format can change over time.
+Factor portfolios are research returns, not costless directly traded assets.
+Allocation charges 10 bps per unit of one-way turnover.
+Synthetic fallback validates software only and cannot support market claims.

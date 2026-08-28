@@ -108,7 +108,9 @@ turnover cost.
 delayed SPX option-chain snapshot into parity-implied forwards, constrained raw-SVI
 smiles, dense-grid static-arbitrage diagnostics, and a global Heston calibration.
 It withholds strikes before fitting and compares Heston with a declared
-flat-volatility null. A standalone mathematical
+flat-volatility null. Its modular multi-date extension adds provider-neutral raw
+archives, fixed split protocols, flat/SVI/PCHIP/SABR/Heston comparisons, and
+date-clustered inference that remains disabled until enough dates exist. A standalone mathematical
 [research paper](projects/volatility_surface/report.pdf) and an
 [executed audit notebook](notebooks/07_spx_surface_heston_validation.ipynb) expose
 the data limitations, parity-boundary event, local parameter uncertainty,

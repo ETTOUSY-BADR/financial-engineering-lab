@@ -1,0 +1,27 @@
+{
+  "config_sha256": "5b38690e791e413b9ed8005864c31964fd3b66dfae21e118d123fb4eaa7f1b5c",
+  "configured_models": [
+    "flat",
+    "svi",
+    "pchip",
+    "sabr",
+    "heston"
+  ],
+  "configured_split_rules": [
+    "every_3",
+    "every_4",
+    "every_5",
+    "seeded_stratified"
+  ],
+  "eligible_date_count": 1,
+  "failure_count": 0,
+  "model_validation_enabled": true,
+  "observation_dates": [
+    "2026-08-27"
+  ],
+  "raw_snapshot_hashes": {
+    "raw/yahoo_delayed/2026-08-27": "778e44918d0d3f9c1ab2b22d19aa92aa656eb823a6a829a54a4d8bb08c30855f"
+  },
+  "snapshot_count": 1,
+  "study": "spx_arbitrage_aware_multidate"
+}

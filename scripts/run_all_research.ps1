@@ -11,7 +11,8 @@ $projects = @(
     "projects/regime_risk/run_research.py",
     "projects/yield_curve_dynamics/run_research.py",
     "projects/factor_allocation/run_research.py",
-    "projects/volatility_surface/run_research.py"
+    "projects/volatility_surface/run_research.py",
+    "projects/volatility_surface/run_multidate.py"
 )
 
 Push-Location $repoRoot

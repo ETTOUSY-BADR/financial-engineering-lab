@@ -1,0 +1,51 @@
+[study]
+name = "spx_arbitrage_aware_multidate"
+symbol = "^SPX"
+random_seed = 20260827
+target_days = [30, 90, 180, 365]
+minimum_expiration_days = 14
+minimum_parity_pairs = 5
+minimum_smile_quotes = 9
+minimum_valid_maturities = 3
+maximum_quotes_per_maturity = 25
+log_moneyness_limit = 0.35
+minimum_option_price = 0.05
+minimum_implied_volatility = 0.03
+maximum_implied_volatility = 1.50
+maximum_iv_uncertainty = 0.30
+maximum_rate = 0.15
+session_hours = 6.5
+post_close_minutes = 20
+
+[paths]
+study_root = "study"
+legacy_quotes = "output/raw_option_quotes.csv"
+legacy_metadata = "output/snapshot_metadata.json"
+
+[splits]
+rules = ["every_3", "every_4", "every_5", "seeded_stratified"]
+seed = 20260827
+stratified_fraction = 0.25
+
+[models]
+names = ["flat", "svi", "pchip", "sabr", "heston"]
+
+[heston]
+lower_bounds = [0.05, 0.005, 0.05, -0.99, 0.005]
+upper_bounds = [12.0, 0.60, 3.00, 0.99, 0.60]
+starts = [
+  [1.5, 0.04, 0.40, -0.70, 0.04],
+  [0.5, 0.06, 0.80, -0.40, 0.05],
+  [3.0, 0.03, 0.25, -0.85, 0.03],
+  [5.0, 0.08, 1.20, -0.20, 0.08],
+  [1.0, 0.12, 1.80, 0.20, 0.10],
+]
+maximum_function_evaluations = 240
+calibration_integration_points = 520
+evaluation_integration_points = 760
+
+[statistics]
+bootstrap_replications = 5000
+minimum_dates_for_bootstrap = 5
+minimum_dates_for_hac = 10
+seed = 20260827

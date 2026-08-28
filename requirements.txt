@@ -6,3 +6,6 @@ scikit-learn
 statsmodels
 yfinance
 jupyterlab
+nbclient>=0.10
+nbformat>=5.10
+ipykernel>=6.29

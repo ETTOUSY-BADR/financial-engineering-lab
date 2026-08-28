@@ -51,6 +51,28 @@ settle. The book uses a 7-by-10-inch monograph trim, readable 12-point typograph
 colored theorem structure, linked navigation, worked examples, proofs, research
 notes, model-risk warnings, and exercises.
 
+## Graduate research notebooks
+
+The [notebook curriculum](notebooks/README.md) turns the mathematical material into
+six executed research laboratories:
+
+1. Monte Carlo convergence, variance reduction, and delta-hedging error;
+2. PCA and Nelson--Siegel yield-curve factors with recursive forecast tests;
+3. portfolio optimization under covariance error, bootstrap instability, and costs;
+4. observable stress regimes, tail risk, VaR coverage, and backtest timing audits;
+5. omitted-variable bias, weak instruments, HAC inference, and genuine out-of-sample
+   forecasting;
+6. implied volatility, lognormal mixtures, static arbitrage, convex quote repair,
+   and Breeden--Litzenberger state-price densities.
+
+They are not presentation-only demos. Each notebook states its information set,
+derives the model, reports numerical diagnostics, compares a benchmark, constructs a
+failure mode, and closes with a model-risk register and research extensions. Tables
+and figures are committed as executed outputs. Re-run the complete sequence from
+fresh kernels with:
+
+    python scripts/execute_notebooks.py
+
 ## Research projects
 
 ### Regime-aware cross-asset risk
@@ -130,7 +152,7 @@ Library, Cboe, ECB, and BIS. Each research dataset should record:
     utils/        tested quantitative-finance primitives
     tests/        mathematical and numerical invariants
     data/         source registry and explicitly sourced datasets
-    notebooks/    lecture-aligned exploratory work
+    notebooks/    executed graduate research curriculum and model-risk laboratories
     scripts/      reproducible build and research entry points
 
 ## Research ethics

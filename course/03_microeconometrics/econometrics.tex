@@ -1,0 +1,16 @@
+\chapter{Microeconometrics and empirical finance}
+\section{Potential outcomes and causal estimands}
+For unit $i$, let $Y_i(1),Y_i(0)$ be potential outcomes. The average treatment effect is $\tau=\E[Y(1)-Y(0)]$. Observed data reveal only $Y_i=D_iY_i(1)+(1-D_i)Y_i(0)$, so causal identification requires assumptions.
+\begin{assumption}[Unconfoundedness]
+$(Y(1),Y(0))\perp D\mid X$, with overlap $0<\Prob(D=1\mid X=x)<1$ on the support.
+\end{assumption}
+Under this assumption, regression adjustment or inverse-probability weighting can identify $\tau$. Financial examples include evaluating a policy announcement or a portfolio signal, but time dependence and interference require care.
+\section{Time series and returns}
+The AR(1) model $r_t=c+\phi r_{t-1}+\varepsilon_t$ is covariance stationary when $|\phi|<1$. For volatility, GARCH(1,1) specifies $\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2+\beta\sigma_{t-1}^2$, with $\omega>0$, $\alpha,\beta\geq0$, and $\alpha+\beta<1$ for finite unconditional variance.
+\section{Regression discipline}
+For $y=X\beta+\varepsilon$, OLS is unbiased conditional on $X$ if $\E[\varepsilon\mid X]=0$. Heteroskedasticity and autocorrelation invalidate naive standard errors; use robust or HAC estimators and report effective sample size. Multiple testing, data snooping, survivorship bias, and look-ahead bias are first-order threats in strategy research.
+\begin{theorem}[Law of large numbers, informal]
+For stationary ergodic observations with finite first moment, sample averages converge almost surely to population expectations. Dependence does not disappear by pretending observations are iid; the assumptions determine the limit theory.
+\end{theorem}
+\section{Validation}
+Use expanding or rolling walk-forward splits. A signal is credible only after transaction costs, turnover, liquidity, missingness, and parameter instability are included. Bootstrap procedures should preserve relevant dependence, for example via moving blocks rather than independently resampling daily returns.

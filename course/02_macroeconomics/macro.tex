@@ -1,0 +1,12 @@
+\chapter{Macroeconomics for markets}
+\section{Intertemporal choice}
+A representative household maximizes $\E_0\sum_{t=0}^{\infty}\beta^t u(c_t)$ subject to $a_{t+1}=(1+r_t)a_t+y_t-c_t$. The Euler equation is $u'(c_t)=\beta(1+r_{t+1})\E_t[u'(c_{t+1})]$. For CRRA utility $u(c)=c^{1-\gamma}/(1-\gamma)$, expected consumption growth is tied to the real short rate and risk aversion.
+\section{IS--Phillips--policy system}
+A compact linearized system is $x_t=\E_tx_{t+1}-\sigma(i_t-\E_t\pi_{t+1}-r_t^n)$ and $\pi_t=\beta\E_t\pi_{t+1}+\kappa x_t+u_t$, with policy $i_t=\rho i_{t-1}+(1-\rho)(\phi_\pi\pi_t+\phi_xx_t)+\varepsilon_t$. The symbols encode the output gap, inflation, nominal rate, natural real rate, and shocks.
+\begin{remark}[Identification]
+A correlation between rates and returns is not automatically a monetary-policy causal effect. Expectations, simultaneous responses, and measurement error must be modeled.
+\end{remark}
+\section{Term structure}
+Under no arbitrage, a zero-coupon bond price is $P(t,T)=\E_t^\mathbb{Q}[e^{-\int_t^T r_s\dd s}]$. Its continuously compounded yield is $y(t,T)=-\log P(t,T)/(T-t)$. Duration approximates price sensitivity: $\Delta P/P\approx-D\,\Delta y+\frac12\mathcal{C}(\Delta y)^2$.
+\section{State-space thinking}
+Latent economic states can be estimated with $x_{t+1}=Ax_t+\eta_{t+1}$ and $y_t=Cx_t+\varepsilon_t$. The Kalman filter is optimal for linear Gaussian systems; otherwise particle or nonlinear filters are needed. Always distinguish a filtered estimate, which uses information through $t$, from a smoothed estimate, which uses future observations.

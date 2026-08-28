@@ -1,0 +1,36 @@
+\chapter{Mathematical foundations}
+\section{Probability and information}
+A probability space is $(\Omega,\mathcal{F},\Prob)$, where events in $\mathcal{F}$ receive probabilities. A filtration $(\mathcal{F}_t)_{t\geq0}$ represents information available through time. A random variable $X$ is measurable with respect to $\mathcal{F}_t$ when its value is known at $t$.
+\begin{definition}[Conditional expectation]
+For integrable $X$, $\E[X\mid\mathcal{G}]$ is the $\mathcal{G}$-measurable random variable satisfying $\E[\1_A\E[X\mid\mathcal{G}]]=\E[\1_AX]$ for every $A\in\mathcal{G}$.
+\end{definition}
+\begin{theorem}[Tower property]
+If $\mathcal{H}\subseteq\mathcal{G}\subseteq\mathcal{F}$ and $X$ is integrable, then $\E[\E[X\mid\mathcal{G}]\mid\mathcal{H}]=\E[X\mid\mathcal{H}]$ almost surely.
+\end{theorem}
+\section{Linear algebra and optimization}
+For a portfolio $w\in\R^n$ and covariance matrix $\Sigma\succeq0$, variance is $w^\top\Sigma w$. The constrained minimum-variance problem is
+\[
+\min_w w^\top\Sigma w\quad\text{s.t.}\quad \1^\top w=1,\quad \mu^\top w=\mu_0.
+\]
+The Lagrangian and first-order conditions are sufficient when the objective is convex and constraints are affine. With only full investment, $w^*=\Sigma^{-1}\1/(\1^\top\Sigma^{-1}\1)$ when $\Sigma$ is positive definite.
+\section{Calculus and differential equations}
+\begin{assumption}[Regular diffusion]
+Let $S_t$ satisfy $\dd S_t=\mu(t,S_t)\dd t+\sigma(t,S_t)\dd W_t$, where coefficients are measurable, Lipschitz in state, and have linear growth.
+\end{assumption}
+\begin{theorem}[Ito's formula]
+For $f\in C^{1,2}$, $\dd f(t,S_t)=\left(f_t+\mu f_s+\tfrac12\sigma^2f_{ss}\right)\dd t+\sigma f_s\dd W_t$.
+\end{theorem}
+The second derivative term is the distinctive feature of stochastic calculus. Applying Ito to $\log S_t$ gives $\dd\log S_t=(\mu-\frac12\sigma^2)\dd t+\sigma\dd W_t$.
+\section{No-arbitrage and change of measure}
+\begin{definition}[Equivalent martingale measure]
+A probability measure $\mathbb{Q}$ is equivalent to $\mathbb{P}$ if they have the same null events. It is risk-neutral for a discounted asset $\widetilde S_t$ when $\widetilde S_t$ is a $\mathbb{Q}$-martingale.
+\end{definition}
+\begin{theorem}[Risk-neutral valuation]
+In a complete arbitrage-free market, the time-$t$ value of a payoff $H$ at $T$ is $V_t=\E^{\mathbb{Q}}[e^{-\int_t^T r_u\dd u}H\mid\mathcal{F}_t]$.
+\end{theorem}
+\section{Black--Scholes as a benchmark}
+For constant $r,\sigma$ and no dividends, a European call $C(S,t)$ solves
+\[
+C_t+rSC_s+\tfrac12\sigma^2S^2C_{ss}-rC=0,\quad C(S,T)=(S-K)^+.
+\]
+The closed form is $C=S\Phi(d_1)-Ke^{-r\tau}\Phi(d_2)$, with $d_{1,2}=[\log(S/K)+(r\pm\frac12\sigma^2)\tau]/(\sigma\sqrt{\tau})$. Its assumptions exclude jumps, stochastic volatility, liquidity costs, and model uncertainty; the formula is a benchmark, not a law of nature.

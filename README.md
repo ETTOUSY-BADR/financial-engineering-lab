@@ -45,22 +45,41 @@ This lab is where **theory meets practice**.
 
 ---
 
-## 🛠 Tools & Libraries
+# Financial Engineering Lab
 
-- Python 3.10+  
-- **NumPy, Pandas, Matplotlib** → numerical + data analysis  
-- **SciPy, statsmodels, scikit-learn** → statistics + ML models  
-- **yfinance** → real-world financial data  
+A research-oriented workspace for studying quantitative finance from first principles: probability, stochastic calculus, asset pricing, econometrics, macro-finance, derivatives, portfolio construction, and risk.
 
----
+## What is here
 
-##  How to Run
+- `course/quant_finance_book.tex` is the master source for the compiled course book, with separate chapters for `01_mathematics`, `02_macroeconomics`, `03_microeconometrics`, and `04_financial_markets`.
+- `course/quant_finance_book.pdf` is the current compiled edition.
+- `utils/quant_models.py` contains small, auditable primitives: log returns, annualized and rolling volatility, drawdown, historical VaR/CVaR, Black-Scholes, and Monte Carlo pricing.
+- `projects/regime_risk/` is the first empirical project. It downloads adjusted prices for `SPY`, `TLT`, `GLD`, and `^VIX`, computes tail-risk diagnostics, and records provenance.
+- `data/` is reserved for explicitly sourced datasets; generated project outputs live beside their project.
+- `notebooks/` is reserved for lecture-aligned experiments that grow out of the book and projects.
 
-```bash
-git clone https://github.com/<your-username>/financial-engineering-lab.git
-cd financial-engineering-lab
+## Reproduce the research
+
+```powershell
 python -m venv .venv
-source .venv/bin/activate  # (Linux/Mac)
-.\.venv\Scripts\activate   # (Windows PowerShell)
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-jupyter lab
+python projects/regime_risk/run_research.py
+```
+
+The default data source is Yahoo Finance via `yfinance`. Without network access, the pipeline uses a deterministic geometric-Brownian-motion fallback and labels it in `projects/regime_risk/output/provenance.txt`; synthetic results are for testing the workflow, not market conclusions.
+
+## Build the book
+
+From the repository root, run twice so the table of contents and cross-references settle:
+
+```powershell
+Push-Location course
+pdflatex -interaction=nonstopmode -halt-on-error quant_finance_book.tex
+pdflatex -interaction=nonstopmode -halt-on-error quant_finance_book.tex
+Pop-Location
+```
+
+## Research standards
+
+Every model should state its probability space, information set, assumptions, estimand, calibration sample, validation design, uncertainty, transaction costs, and failure modes. Results are educational research and are not investment advice.

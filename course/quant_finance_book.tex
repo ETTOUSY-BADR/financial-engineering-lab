@@ -1,0 +1,28 @@
+\documentclass[11pt,oneside]{book}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,microtype,hyperref,xcolor,enumitem,fancyhdr}
+\definecolor{ink}{HTML}{17202A}\definecolor{accent}{HTML}{0B6E69}
+\hypersetup{colorlinks=true,linkcolor=accent,urlcolor=accent,citecolor=accent,pdftitle={Quantitative Finance: From Foundations to Research}}
+\pagestyle{fancy}\fancyhf{}\fancyhead[LE,RO]{\thepage}\fancyhead[RE]{\nouppercase{\leftmark}}\fancyhead[LO]{Financial Engineering Lab}
+\newtheorem{theorem}{Theorem}[chapter]\newtheorem{proposition}[theorem]{Proposition}\newtheorem{lemma}[theorem]{Lemma}\newtheorem{definition}[theorem]{Definition}\newtheorem{assumption}[theorem]{Assumption}\newtheorem{remark}[theorem]{Remark}
+\DeclareMathOperator{\E}{\mathbb{E}}\DeclareMathOperator{\Var}{Var}\DeclareMathOperator{\Cov}{Cov}\DeclareMathOperator{\Prob}{\mathbb{P}}\newcommand{\R}{\mathbb{R}}\newcommand{\dd}{\,\mathrm{d}}\newcommand{\1}{\mathbf{1}}
+\begin{document}
+\frontmatter
+\begin{titlepage}\centering\vspace*{2cm}{\color{accent}\rule{\textwidth}{1.5pt}}\\[1.2cm]
+{\Huge\bfseries Quantitative Finance\\[0.2cm]From Foundations to Research}\\[1cm]
+{\Large A mathematical and empirical laboratory for financial engineering}\\[2cm]
+\begin{tabular}{ll}Author: & Badr Ettousy\\Repository: & Financial Engineering Lab\\Version: & 1.0, 2026\end{tabular}
+\vfill\emph{Theory is a model; evidence is a discipline.}\end{titlepage}
+\chapter*{How to use this book}\addcontentsline{toc}{chapter}{How to use this book}
+This text is a study companion, not investment advice. Every model is conditional on assumptions, calibration choices, and data quality. Read each theorem with its hypotheses, reproduce each numerical result, and treat out-of-sample validation as part of the mathematics.
+\tableofcontents
+\mainmatter
+\input{01_mathematics/foundations}
+\input{02_macroeconomics/macro}
+\input{03_microeconometrics/econometrics}
+\input{04_financial_markets/markets}
+\backmatter
+\chapter*{Research checklist}\addcontentsline{toc}{chapter}{Research checklist}
+Before trusting a result: state the estimand; identify the filtration and information set; write the assumptions; separate training, validation, and test periods; report uncertainty; stress the model; test sensitivity to costs, missing data, and dependence; and document provenance.
+\end{document}

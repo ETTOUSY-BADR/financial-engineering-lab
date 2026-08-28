@@ -1,0 +1,16 @@
+\chapter{Financial markets and engineering practice}
+\section{Market instruments}
+Equities are claims on residual cash flows; bonds promise contractual cash flows; forwards and futures transfer exposure to a future price; options create nonlinear payoffs. A payoff diagram is often the fastest way to expose hidden leverage and tail risk.
+\section{Risk measures}
+For loss $L$, Value at Risk at level $\alpha$ is $\operatorname{VaR}_\alpha(L)=\inf\{\ell:\Prob(L\leq\ell)\geq\alpha\}$. Expected Shortfall is $\operatorname{ES}_\alpha(L)=\E[L\mid L\geq\operatorname{VaR}_\alpha(L)]$ when the conditional expectation is well-defined. Historical, parametric, and Monte Carlo estimates answer different questions.
+\begin{proposition}[Subadditivity of Expected Shortfall]
+Under standard integrability conditions, $\operatorname{ES}_\alpha(X+Y)\leq\operatorname{ES}_\alpha(X)+\operatorname{ES}_\alpha(Y)$. This makes Expected Shortfall a coherent risk measure alongside monotonicity, positive homogeneity, and translation invariance.
+\end{proposition}
+\section{Portfolio construction}
+Mean-variance optimization is $\max_w w^\top\mu-\frac{\lambda}{2}w^\top\Sigma w$ subject to constraints. Estimation error can dominate the theoretical solution, so shrinkage covariance estimates, robust constraints, and out-of-sample tests are essential. Risk parity targets contributions $RC_i=w_i(\Sigma w)_i/(w^\top\Sigma w)$ rather than raw weights.
+\section{Numerical methods}
+A Monte Carlo estimator for $V=e^{-rT}\E[h(S_T)]$ is $\widehat V=e^{-rT}n^{-1}\sum_{j=1}^nh(S_T^{(j)})$ with standard error $s/\sqrt n$. Antithetic variates, control variates, stratification, and quasi-random sequences reduce variance but do not cure a misspecified model.
+\section{Calibration and model risk}
+Calibration minimizes a weighted discrepancy between observed and model prices, often $\min_\theta\sum_i w_i(P_i^{\mathrm{model}}(\theta)-P_i^{\mathrm{mkt}})^2$. A low calibration error is not validation: examine residual structure, stability across dates, and hedging performance. Greeks such as $\Delta=\partial V/\partial S$ and $\Gamma=\partial^2V/\partial S^2$ quantify local sensitivity, while stress tests explore nonlocal moves.
+\section{Market microstructure}
+Observed prices reflect bid--ask spreads, discrete trading, latency, price impact, and constraints. A backtest must execute at plausible prices and align signal timestamps with the next available trade. A strategy with positive frictionless alpha can have negative net performance after costs.

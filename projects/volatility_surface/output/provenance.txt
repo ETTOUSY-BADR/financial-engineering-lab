@@ -1,0 +1,23 @@
+Ticker: ^SPX
+Source: Yahoo Finance delayed option chain via yfinance
+Evidence class: public delayed snapshot; not an exchange record
+Acquired UTC: 2026-08-28T14:38:40.477756+00:00
+Reference session date: 2026-08-27
+Valuation timestamp UTC: 2026-08-27T20:00:00+00:00
+Underlying reference close: 7730.990234375
+Selected expirations: 2026-09-18, 2026-11-20, 2027-02-19, 2027-08-20
+Raw quote rows: 2459
+Clean OTM quote rows: 391
+Raw CSV SHA-256: cbb90c5700c54d4e753de52326f29463eeb3b2c5a36224fe64081c94a55088f8
+Price convention: positive last trades during the complete reference session through twenty minutes after close.
+The transaction cross section is asynchronous and is not an executable simultaneous surface.
+Forward/discount convention: liquidity- and time-gap-weighted robust put-call parity regression.
+Discount identification is bounded to continuous rates between 0% and 15%; boundary hits are reported.
+Parity median absolute residual is propagated as an empirical price-noise scale.
+Expiration clock: 20:00 UTC regular-session approximation; ACT/365.25 year fraction.
+Yahoo Finance is a public distributor, not an exchange record or OPRA archive.
+Displayed bid/ask fields are retained but rejected as a calibration source when markets are absent.
+OCC/OIC quote reference: https://www.optionseducation.org/news/understanding-the-bid-and-ask-prices-for-options
+SVI reference: Gatheral and Jacquier (2014), https://arxiv.org/abs/1204.0646
+Heston reference: Heston (1993), https://doi.org/10.1093/rfs/6.2.327
+Synthetic fallback, when used, validates software only and cannot support market claims.

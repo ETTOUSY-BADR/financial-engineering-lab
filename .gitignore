@@ -10,3 +10,9 @@ course/*.fls
 course/*.log
 course/*.out
 course/*.toc
+projects/**/*.aux
+projects/**/*.fdb_latexmk
+projects/**/*.fls
+projects/**/*.log
+projects/**/*.out
+projects/**/*.toc

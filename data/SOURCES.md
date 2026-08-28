@@ -30,3 +30,13 @@ but should not silently become production evidence.
 Yahoo Finance through yfinance is used in the open cross-asset prototype because it
 is convenient and reproducible for many readers. It is not treated as the primary
 exchange record or as licensed institutional point-in-time data.
+
+The SPX volatility-surface project also preserves a Yahoo Finance delayed-chain
+snapshot because a redistributable exchange-certified historical NBBO is not
+available in this open laboratory. Contract transaction timestamps, displayed
+bid/ask fields, volume, open interest, acquisition time, source classification, and
+checksums are retained. The study uses reference-session last transactions because
+the displayed bid/ask cross-section was too sparse; it therefore labels prices as
+asynchronous research observations rather than executable quotes. The Options
+Industry Council's bid/ask discussion is recorded as market-structure context:
+https://www.optionseducation.org/news/understanding-the-bid-and-ask-prices-for-options

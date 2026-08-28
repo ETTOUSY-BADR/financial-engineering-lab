@@ -54,7 +54,7 @@ notes, model-risk warnings, and exercises.
 ## Graduate research notebooks
 
 The [notebook curriculum](notebooks/README.md) turns the mathematical material into
-six executed research laboratories:
+seven executed research laboratories:
 
 1. Monte Carlo convergence, variance reduction, and delta-hedging error;
 2. PCA and Nelson--Siegel yield-curve factors with recursive forecast tests;
@@ -63,7 +63,9 @@ six executed research laboratories:
 5. omitted-variable bias, weak instruments, HAC inference, and genuine out-of-sample
    forecasting;
 6. implied volatility, lognormal mixtures, static arbitrage, convex quote repair,
-   and Breeden--Litzenberger state-price densities.
+   and Breeden--Litzenberger state-price densities;
+7. robust SPX parity identification, constrained SVI, Fourier Heston calibration,
+   multi-start stability, and genuinely held-out strike validation.
 
 They are not presentation-only demos. Each notebook states its information set,
 derives the model, reports numerical diagnostics, compares a benchmark, constructs a
@@ -100,6 +102,18 @@ program shrinks covariance toward its diagonal and solves a constrained
 minimum-variance allocation before observing each next month, charging a transparent
 turnover cost.
 
+### Arbitrage-aware SPX volatility surface
+
+[projects/volatility_surface](projects/volatility_surface) converts an immutable
+delayed SPX option-chain snapshot into parity-implied forwards, constrained raw-SVI
+smiles, dense-grid static-arbitrage diagnostics, and a global Heston calibration.
+It withholds strikes before fitting and compares Heston with a declared
+flat-volatility null. A standalone mathematical
+[research paper](projects/volatility_surface/report.pdf) and an
+[executed audit notebook](notebooks/07_spx_surface_heston_validation.ipynb) expose
+the data limitations, parity-boundary event, local parameter uncertainty,
+multi-start stability, and negative Feller slack alongside the favorable result.
+
 All projects write a provenance manifest. When online data are unavailable,
 deterministic synthetic panels keep the software testable and are unmistakably
 labeled as non-empirical.
@@ -114,6 +128,10 @@ labeled as non-empirical.
   minimum-variance weights, and Euler risk contributions;
 - Nelson--Siegel loadings and weighted curve fitting;
 - Black--Scholes calls and puts, Greeks, implied volatility, and Monte Carlo pricing.
+
+[utils/option_surface.py](utils/option_surface.py) adds forward-Black pricing and
+inversion, robust parity identification, raw-SVI fitting with butterfly and wing
+constraints, and vectorized Heston Fourier pricing.
 
 The invariant-based test suite covers pricing parity, implied-volatility round trips,
 Monte Carlo error, curve-factor recovery, PSD covariance, Euler risk attribution,

@@ -1,6 +1,6 @@
 # Graduate Quantitative Research Notebooks
 
-This directory is a research-facing companion to the monograph and the three reproducible projects. The notebooks are ordered as a coherent laboratory sequence rather than a collection of disconnected demos.
+This directory is a research-facing companion to the monograph and the four reproducible projects. The notebooks are ordered as a coherent laboratory sequence rather than a collection of disconnected demos.
 
 | Lab | Research question | Core methods | Evidence |
 |---|---|---|---|
@@ -10,6 +10,8 @@ This directory is a research-facing companion to the monograph and the three rep
 | [04 — Regime risk and backtest integrity](04_regime_risk_and_backtest_integrity.ipynb) | Which conclusions remain after timing, tails, and turnover are audited? | Observable regimes, expected shortfall, volatility targeting, leakage controls, Kupiec coverage | SPY/TLT/GLD/VIX panel saved by the project |
 | [05 — Identification and forecasting](05_identification_and_forecasting.ipynb) | Why is prediction not identification, and why is in-sample fit not a forecast? | Omitted-variable bias, IV strength, HAC inference, recursive forecasting, out-of-sample R² | Simulation plus Kenneth French factors |
 | [06 — Implied volatility and static arbitrage](06_implied_volatility_and_static_arbitrage.ipynb) | What information is encoded in option prices, and when is a smile internally inconsistent? | Black–Scholes inversion, lognormal mixtures, monotonicity/convexity tests, Breeden–Litzenberger density | Controlled arbitrage-free and contaminated surfaces |
+
+| [07 — SPX surface and Heston validation](07_spx_surface_heston_validation.ipynb) | Does a single stochastic-volatility parameter vector beat a declared null on untouched SPX strikes? | Robust parity, constrained SVI, Heston Fourier calibration, multi-start stability, strike holdout | Immutable delayed SPX chain with manifest verification |
 
 ## Research standard
 
